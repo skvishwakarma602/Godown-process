@@ -295,6 +295,7 @@
     }
     
     button.btn-share { background: #25d366; color: #fff; border: none; }
+    button.btn-share-summary { background: #128c7e; color: #fff; border: none; }
     button.btn-excel { background: #1f7244; color: #fff; border: none; }
     button.btn-pdf { background: #e53e3e; color: #fff; border: none; }
 
@@ -431,7 +432,8 @@
     <button onclick="filter='deduct';render()">Deduct</button>
     <button onclick="filter='highlighted';render()">New Updated</button>
 
-    <button class="btn-share" onclick="shareReport()">Share Text</button>
+    <button class="btn-share" onclick="shareReport()">Share Detailed Text</button>
+    <button class="btn-share-summary" onclick="shareSummaryWhatsApp()">Share Summary WA</button>
     <button class="btn-excel" onclick="exportToExcel()">Share Excel</button>
     <button class="btn-pdf" onclick="sharePDF()">Share PDF</button>
     <button class="btn-clear" onclick="clearAll()">Clear</button>
@@ -1305,6 +1307,72 @@ function shareReport(){
       }
     });
   });
+
+  window.location.href = "https://wa.me/?text=" + encodeURIComponent(txt);
+}
+
+function shareSummaryWhatsApp(){
+  const now = new Date();
+  const dateFormatted = now.toLocaleDateString('en-GB');
+  
+  let txt = `*Godown Process*\n   *Date:- ${dateFormatted}*\n\n`;
+  
+  let totalDeductions = 0;
+  let totalPhotosAttached = 0;
+
+  data.forEach((proc, index) => {
+    let procTotalMarks = 0;
+    let procDeductedMarks = 0;
+    let hasDeductions = false;
+    let deductionDetails = [];
+
+    proc.points.forEach((pt, ptIndex) => {
+      let m = Number(pt.marks);
+      procTotalMarks += m;
+
+      if(pt.checked) {
+        hasDeductions = true;
+        procDeductedMarks += m;
+        totalDeductions += m;
+
+        let detailStr = "";
+        if (pt.comment && pt.comment.trim() !== "") {
+          detailStr = pt.comment.trim();
+        } else {
+          let cleanDesc = pt.desc.replace(/<[^>]*>/g, '');
+          detailStr = cleanDesc.length > 50 ? cleanDesc.substring(0, 47) + "..." : cleanDesc;
+        }
+
+        if (pt.photos && pt.photos.length > 0) {
+          totalPhotosAttached += pt.photos.length;
+          detailStr += ` 📷 (${pt.photos.length} Photo attached)`;
+        }
+
+        deductionDetails.push(`${ptIndex + 1}) ${detailStr}`);
+      }
+    });
+
+    let procMax = procTotalMarks.toFixed(2);
+    let procAchieved = (procTotalMarks - procDeductedMarks).toFixed(2);
+
+    if (!hasDeductions) {
+      txt += `${index + 1}) ${proc.name} ${procMax}/${procAchieved} ✅\n`;
+    } else {
+      txt += `${index + 1}) ${proc.name} ${procMax}/${procAchieved} ❌\n`;
+      deductionDetails.forEach(detail => {
+        txt += `   ${detail}\n`;
+      });
+    }
+  });
+
+  let totalMaxFormatted = TOTAL_MAX.toFixed(2);
+  let totalAchievedFormatted = (TOTAL_MAX - totalDeductions).toFixed(2);
+
+  txt += `\n*Total :- ${totalMaxFormatted}/${totalAchievedFormatted}*\n`;
+
+  if (totalPhotosAttached > 0) {
+    txt += `\n📌 *Note:* ${totalPhotosAttached} photo(s) attached in detailed audit app inspection.`;
+  }
 
   window.location.href = "https://wa.me/?text=" + encodeURIComponent(txt);
 }
