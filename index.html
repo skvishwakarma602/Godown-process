@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-title" content="Godown Audit">
   <meta name="theme-color" content="#3182ce">
   
-  <!-- Embedded Upgraded Industrial App Icon & Web Manifest (Factory & Worker Theme) -->
+  <!-- Embedded Industrial App Icon & Web Manifest (Factory & Worker Theme) -->
   <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%231e3a8a'/><stop offset='100%25' stop-color='%233182ce'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23bg)'/><path d='M120 380V220l136-80l136 80v160H120z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linejoin='round'/><path d='M200 380V260h112v120' fill='none' stroke='%23ffffff' stroke-width='20'/><circle cx='256' cy='90' r='35' fill='%23f59e0b'/><path d='M100 424h312' stroke='%23ffffff' stroke-width='28' stroke-linecap='round'/></svg>">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%231e3a8a'/><stop offset='100%25' stop-color='%233182ce'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23bg)'/><path d='M120 380V220l136-80l136 80v160H120z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linejoin='round'/><path d='M200 380V260h112v120' fill='none' stroke='%23ffffff' stroke-width='20'/><circle cx='256' cy='90' r='35' fill='%23f59e0b'/><path d='M100 424h312' stroke='%23ffffff' stroke-width='28' stroke-linecap='round'/></svg>">
   
@@ -295,7 +295,6 @@
       gap: 6px;
     }
     
-    button.btn-install { background: #4f46e5; color: #fff; border: none; }
     button.btn-share { background: #25d366; color: #fff; border: none; }
     button.btn-share-summary { background: #128c7e; color: #fff; border: none; }
     button.btn-share-text { background: #0d9488; color: #fff; border: none; }
@@ -428,7 +427,6 @@
   <div id="result" style="margin-bottom: 12px; font-size: 15px;"></div>
 
   <div class="action-bar">
-    <button id="btnInstallApp" class="btn-install" style="display:none;" onclick="triggerAppInstall()">📲 Install App</button>
     <input type="file" id="upload" accept=".xlsx, .xls" style="display:inline-block; max-width: 180px;">
     <input type="text" id="search" placeholder="Search points..." oninput="render()">
 
@@ -472,40 +470,6 @@
 </div>
 
 <script>
-// PWA Service Worker & Install Prompt Handler
-let deferredPrompt = null;
-
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    self.addEventListener('install', e => self.skipWaiting());
-    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-  `;
-  const blob = new Blob([swCode], { type: 'text/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Reg failed:', err));
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const installBtn = document.getElementById('btnInstallApp');
-  if (installBtn) installBtn.style.display = 'inline-flex';
-});
-
-async function triggerAppInstall() {
-  if (!deferredPrompt) {
-    alert("To install, tap your browser menu (⋮ or share icon) and select 'Add to Home screen' or 'Install App'.");
-    return;
-  }
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') {
-    document.getElementById('btnInstallApp').style.display = 'none';
-  }
-  deferredPrompt = null;
-}
-
 let data=[];
 let filter="all";
 let openSections={};
@@ -532,22 +496,22 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Receiving person must receive PO & Bill with Security Stamp. PO & Bill must be checked for correct store address before start of receiving. Samples along with PO & Invoice to be checked for all details like MRP, EAN, Grammage, Shelf Life, etc.", 
-        hindiDesc: "Receiving person को Security Stamp के साथ PO & Bill प्राप्त करना चाहिए। Receiving शुरू करने से पहले PO & Bill में correct store address की जांच करनी चाहिए। Samples को PO & Invoice के साथ MRP, EAN, Grammage, Shelf Life आदि सभी details के लिए check किया जाना चाहिए।.", 
+        hindiDesc: "Receiving person  Security Stamp   PO & Bill    Receiving     PO & Bill  correct store address     Samples  PO & Invoice   MRP, EAN, Grammage, Shelf Life   details   check   .", 
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true 
       },
       { 
         desc: "2) Debits to be handed over to vendor before the start of receiving.", 
-        hindiDesc: "Receiving शुरू करने से पहले Debits को vendor को सौंप दिया जाना चाहिए।.",
+        hindiDesc: "Receiving     Debits  vendor     .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Receiving person to make space available for new stocks and supervise the stacking of the entire new stock in the designated place in godown by the vendor. Enter details in Inward Register immediately after each receiving is complete & affix Inward stamp on Bill.", 
-        hindiDesc: "Receiving person को new stocks के लिए space available करना चाहिए और vendor द्वारा godown में designated place पर पूरे new stock की stacking को supervise करना चाहिए। प्रत्येक receiving complete होने के तुरंत बाद Inward Register में details enter करें और Bill पर Inward stamp लगाएं।.",
+        hindiDesc: "Receiving person  new stocks   space available    vendor  godown  designated place   new stock  stacking  supervise    receiving complete     Inward Register  details enter   Bill  Inward stamp .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true 
       },
       { 
         desc: "4) Handover sample basket, PO & Invoice to GRN after each receiving is entered in the register. Short receiving quantities must be corrected in both copies of Invoice.", 
-        hindiDesc: "Register में प्रत्येक receiving enter होने के बाद sample basket, PO & Invoice को GRN को handover करें। Invoice की दोनों copies में short receiving quantities को correct किया जाना चाहिए।.",
+        hindiDesc: "Register   receiving enter    sample basket, PO & Invoice  GRN  handover  Invoice   copies  short receiving quantities  correct   .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: true 
       }
     ]
@@ -557,27 +521,27 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Entries in the Inward Registers made by Receiving Person immediately after receiving each PO/Bill. This is to avoid double entries for the same Inward No or entries made in wrong registers. Inward Nos to be serially entered. Nos to be continued in the same sequence with only month no changing - Eg 01/234 (last entry for Jan); 02/235 (1st entry for Feb) etc. Overwriting, Use of Whitener or blank stickers, etc should not be done to cover any wrong entries. For corrections a single line cancellation to be done and new details to be written above or below that particular entry. Only Quantity corrections should not be done.", 
-        hindiDesc: "प्रत्येक PO/Bill receive करने के तुरंत बाद Receiving Person द्वारा Inward Registers में entries की जाती हैं। यह उसी Inward No के लिए double entries या गलत registers में entry से बचने के लिए है। Inward Nos serial wise enter किए जाने चाहिए। Numbers उसी sequence में जारी रहेंगे जिसमें केवल month no change होगा - जैसे 01/234 (Jan की last entry); 02/235 (Feb की 1st entry) आदि। किसी भी wrong entry को cover करने के लिए overwriting, Whitener या blank stickers का use नहीं किया जाना चाहिए। Corrections के लिए एक single line cancellation किया जाना चाहिए और उस particular entry के ऊपर या नीचे new details write की जानी चाहिए। केवल Quantity corrections नहीं किए जाने चाहिए।.",
+        hindiDesc: " PO/Bill receive     Receiving Person  Inward Registers  entries      Inward No   double entries   registers  entry      Inward Nos serial wise enter    Numbers  sequence      month no change  -  01/234 (Jan  last entry); 02/235 (Feb  1st entry)    wrong entry  cover    overwriting, Whitener  blank stickers  use     Corrections    single line cancellation      particular entry     new details write     Quantity corrections    .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: true 
       },
       { 
         desc: "2) Separate Registers to be maintained for Core FMCG; Core Grocery (Pack & Loose with partition); Non Core (with partitions) : Garments; Hosiery; Footwear; Plastics; Stainless Steel; Bed&Bath; Seasonal; Stationery etc. Proper abbreviations for each section to be entered correctly. For FMCG : 01/001; Pack Grocery : 01/PG/001; Loose Grocery : 01/LG/001; Garments : 01/G/001; Footwear : 01/F/001; Hosiery : 01/H/001; Plastics : 01/P/001; Stainless Steel : 01/SS/001; Bed & Bath : 01/BB/001; Seasonal : 01/S/001; Stationery : 01/ST/001 etc.", 
-        hindiDesc: "Core FMCG; Core Grocery (Pack & Loose with partition); Non Core (with partitions) जैसे Garments; Hosiery; Footwear; Plastics; Stainless Steel; Bed & Bath; Seasonal; Stationery आदि के लिए अलग Registers maintain किए जाने चाहिए। प्रत्येक section के लिए proper abbreviations सही ढंग से enter किए जाने चाहिए। FMCG के लिए: 01/001; Pack Grocery के लिए: 01/PG/001; Loose Grocery के लिए: 01/LG/001; Garments के लिए: 01/G/001 आदि।.",
+        hindiDesc: "Core FMCG; Core Grocery (Pack & Loose with partition); Non Core (with partitions)  Garments; Hosiery; Footwear; Plastics; Stainless Steel; Bed & Bath; Seasonal; Stationery     Registers maintain     section   proper abbreviations    enter    FMCG  : 01/001; Pack Grocery  : 01/PG/001; Loose Grocery  : 01/LG/001; Garments  : 01/G/001 .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Receiving person must enter all details in the register including Vendor Name; PO no; Invoice No; Brief Description; Bill Quantity; Invoice Amount; Time; Name of receiver; Signature. Godown Officer to check & sign for entries made by Godown assistant. Receiving Officer to enter the correct Inward No on Invoice & PO. Entries must be made after completion of each receiving i.e. for each PO & Invoice & sample basket must be handed over to GRN immediately. This is to provide adequate time for GRN to make error free entries in the system.", 
-        hindiDesc: "Receiving person को register में Vendor Name, PO no, Invoice No, Brief Description, Bill Quantity, Invoice Amount, Time, Name of receiver, Signature सहित सभी details enter करनी चाहिए। Godown assistant द्वारा की गई entries को Godown Officer द्वारा check & sign किया जाना चाहिए। Receiving Officer को Invoice & PO पर correct Inward No enter करना चाहिए। प्रत्येक receiving complete होने के बाद entries की जानी चाहिए और sample basket तुरंत GRN को handover कर दी जानी चाहिए।.",
+        hindiDesc: "Receiving person  register  Vendor Name, PO no, Invoice No, Brief Description, Bill Quantity, Invoice Amount, Time, Name of receiver, Signature   details enter   Godown assistant    entries  Godown Officer  check & sign    Receiving Officer  Invoice & PO  correct Inward No enter    receiving complete    entries     sample basket  GRN  handover    .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "4) Godown Officer to check all entries in the inward register with MB 51 report provided by GRN every day and enter the correct GRN no & Date in the register. If any new GRN nos are observed in the inward sheet due to cancellations, new GRN nos to be entered in Inward Register after striking the old GRN nos. For Partial GRN, second GRN no., Quantity & Date must also be entered in the register. If any discrepancies are noticed, Godown Officer to verify the details with the hard copy of PO & Invoice, inform GRN for necessary corrections and enter correct details after informing the Duty Manager.", 
-        hindiDesc: "Godown Officer को हर दिन GRN द्वारा provide किए गए MB 51 report के साथ inward register की सभी entries को check करना चाहिए और register में correct GRN no & Date enter करनी चाहिए। Cancellations के कारण inward sheet में कोई भी new GRN nos दिखने पर old GRN nos को strike करके Inward Register में new GRN nos enter करें। Partial GRN के लिए दूसरा GRN no., Quantity & Date भी register में enter किया जाना चाहिए। Discrepancies मिलने पर, Godown Officer को PO & Invoice की hard copy से details verify करनी चाहिए, Grn को corrections के लिए inform करना चाहिए और Duty Manager को inform करने के बाद correct details enter करनी चाहिए।.",
+        hindiDesc: "Godown Officer    GRN  provide   MB 51 report   inward register   entries  check    register  correct GRN no & Date enter   Cancellations   inward sheet    new GRN nos   old GRN nos  strike  Inward Register  new GRN nos enter  Partial GRN    GRN no., Quantity & Date  register  enter    Discrepancies  , Godown Officer  PO & Invoice  hard copy  details verify  , Grn  corrections   inform    Duty Manager  inform    correct details enter  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true 
       },
       { 
         desc: "5) Duty Manager to check entries in the register with inward sheet and sign for each entry. Duty Manager to provide timely inputs to the godown team to minimise errors in the receiving process.", 
-        hindiDesc: "Duty Manager को inward sheet के साथ register में entries check करनी चाहिए और प्रत्येक entry के लिए sign करना चाहिए। Duty Manager को receiving process में errors को minimize करने के लिए godown team को timely inputs provide करने चाहिए।.",
+        hindiDesc: "Duty Manager  inward sheet   register  entries check     entry   sign   Duty Manager  receiving process  errors  minimize    godown team  timely inputs provide  .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -587,17 +551,17 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) AFPPL Inward Register : Both sections of the register must be updated. Inward details for Softy Premix, Popcorn, Kwality Walls & Cones for GRN and MIRO details for expenses section. Part 1: Raw materials, Where we do GRN. Series for inward No to begin with 01/AFPPL/01. GRN number along with Date to be mentioned in the inward register. Overwriting, Whitener or blank stickers should not be done to cover any wrong entries. For corrections a single line cancellation to be done and new details to be written above or below that particular entry. Only Quantity corrections should not be done. AFPPL Expenses: All entries of other material for which GRN is not made, needs to be entered in the 2nd Part (Disposables, Water & Machine Spares & other items). The series to have Prefix 01/FPEX/01. Document number provided by Accounts with date needs to be entered in the register.", 
-        hindiDesc: "AFPPL Inward Register: Register के दोनों sections update किए जाने चाहिए। GRN के लिए Softy Premix, Popcorn, Kwality Walls & Cones के लिए Inward details और expenses section के लिए MIRO details। Part 1: Raw materials, जहाँ हम GRN करते हैं। Inward No की series 01/AFPPL/01 से begin होनी चाहिए। Inward register में Date के साथ GRN number mention किया जाना चाहिए। Overwriting, Whitener या blank stickers का use नहीं होना चाहिए। AFPPL Expenses: अन्य materials जिनकी GRN नहीं बनती, उनकी सभी entries 2nd Part (Disposables, Water & Machine Spares & अन्य items) में enter की जानी चाहिए। Series का Prefix 01/FPEX/01 होना चाहिए। Accounts द्वारा provide document number with date register में enter होना चाहिए।.",
+        hindiDesc: "AFPPL Inward Register: Register   sections update    GRN   Softy Premix, Popcorn, Kwality Walls & Cones   Inward details  expenses section   MIRO details Part 1: Raw materials,   GRN   Inward No  series 01/AFPPL/01  begin   Inward register  Date   GRN number mention    Overwriting, Whitener  blank stickers  use    AFPPL Expenses:  materials  GRN  ,   entries 2nd Part (Disposables, Water & Machine Spares &  items)  enter    Series  Prefix 01/FPEX/01   Accounts  provide document number with date register  enter  .",
         marks: 0.2, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "2) Godown Officer to check all entries in the inward register with MB 51 report provided by GRN every day and enter the correct GRN no & Date in the register. If any new GRN nos are observed in the inward sheet due to cancellations, new GRN nos to be entered in Inward Register after striking the old GRN nos. If any discrepancies are noticed, Godown Officer to verify the details with the hard copy of PO & Invoice, inform GRN for necessary corrections and correct details to be entered after informing the Duty Manager.", 
-        hindiDesc: "Godown Officer को हर दिन GRN द्वारा provide MB 51 report के साथ inward register की सभी entries check करनी चाहिए और correct GRN no & Date enter करनी चाहिए। Discrepancies मिलने पर Godown Officer PO & Invoice की hard copy से details verify करे, Grn को inform करे और Duty Manager को inform करने के बाद correct details enter करे।.",
+        hindiDesc: "Godown Officer    GRN  provide MB 51 report   inward register   entries check    correct GRN no & Date enter   Discrepancies   Godown Officer PO & Invoice  hard copy  details verify , Grn  inform   Duty Manager  inform    correct details enter .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Duty Manager to check entries in the register with inward sheet and sign for each entry. Duty Manager to provide timely inputs to the godown team to minimise errors in the receiving process.", 
-        hindiDesc: "Duty Manager inward sheet के साथ entries check करके sign करेगा और receiving process में errors minimize करने के लिए inputs देगा।.",
+        hindiDesc: "Duty Manager inward sheet   entries check  sign   receiving process  errors minimize    inputs .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -607,17 +571,17 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Any articles Received through LR copy or courier to be treated as Transport Receiving. Details on LR, PO, Bill must be checked for the correct address before unloading the transport bundles. Each bundle to be weighed & weight of each bundle to be checked with LR & to be entered in register.", 
-        hindiDesc: "LR copy या courier के थ्रू receive किए गए किसी भी article को Transport Receiving माना जाएगा। Transport bundles unload करने से पहले LR, PO, Bill पर correct address check किया जाना चाहिए। प्रत्येक bundle का weight किया जाना चाहिए और LR के साथ weight check करके register में enter करना चाहिए।.",
+        hindiDesc: "LR copy  courier   receive     article  Transport Receiving   Transport bundles unload    LR, PO, Bill  correct address check     bundle  weight     LR   weight check  register  enter  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "2) Bundles to be opened & entries in Inward register to be done on same day. All details to be entered in the register like LR no; Transport name; Vendor Name; No of Bundles; PO No; Invoice No; Weight of bundles; Inward No. & Date, GRN No & Date. etc. GRN details to be entered from MB 51 Inward Sheet next day. In case of wrong delivery by the transport such as wrong address or if PO is closed for a delivery, the same has to be addressed to the category with CH in loop. Store to follow the next steps as suggested by the category.", 
-        hindiDesc: "Bundles open किए जाने चाहिए और उसी दिन Inward register में entries करनी चाहिए। Register में LR no, Transport name, Vendor Name, No of Bundles, PO No, Invoice No, Weight of bundles, Inward No & Date, GRN No & Date जैसी सभी details enter करें। Next day MB 51 Inward Sheet से GRN details enter करें। Transport द्वारा wrong delivery (जैसे गलत address या PO close होना) होने पर CH को loop में रखकर category को address करना चाहिए।.",
+        hindiDesc: "Bundles open       Inward register  entries   Register  LR no, Transport name, Vendor Name, No of Bundles, PO No, Invoice No, Weight of bundles, Inward No & Date, GRN No & Date   details enter  Next day MB 51 Inward Sheet  GRN details enter  Transport  wrong delivery (  address  PO close )   CH  loop   category  address  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "3) Duty Manager to check & sign after verifying correctness of all entries in the register.", 
-        hindiDesc: "Duty Manager register में सभी entries की correctness verify करके check & sign करेगा।.",
+        hindiDesc: "Duty Manager register   entries  correctness verify  check & sign .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -627,17 +591,17 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Bills for all other articles purchased for store use to be stamped with security stamp when these articles are brought to the store. Bills signed by Duty Manager must be handed over to Godown Staff for entering in the register. Entry to be made immediately in the other inward register and Inward No to be recorded on the bills. Godown Staff to ensure Bill Date, Date on Security stamp and Date on Godown Inward Stamp should be same. Bills to be handed over to Accounts on the same day for payment process. Accounts to sign with date & time in the register. (Sundays & Holidays to be exempted). For Articles received in absence of Godown officers, entries in the register must be made by Duty Manager. Such bills will be handed over to Accounts on next day.", 
-        hindiDesc: "Store use के लिए purchased अन्य सभी articles के bills को store में लाने पर security stamp से stamp किया जाना चाहिए। Duty Manager द्वारा signed bills Godown Staff को register में enter करने के लिए handover किए जाने चाहिए। Other inward register में immediate entry करके bills पर Inward No record किया जाना चाहिए। Godown Staff यह ensure करे कि Bill Date, Security stamp की Date और Godown Inward Stamp की Date same हों। Payment process के लिए उसी दिन bills Accounts को handover किए जाएं। (Sundays & Holidays exempted रहेंगे)।.",
+        hindiDesc: "Store use   purchased   articles  bills  store    security stamp  stamp    Duty Manager  signed bills Godown Staff  register  enter    handover    Other inward register  immediate entry  bills  Inward No record    Godown Staff  ensure   Bill Date, Security stamp  Date  Godown Inward Stamp  Date same  Payment process     bills Accounts  handover   (Sundays & Holidays exempted ).",
         marks: 0.2, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) Photocopy of Gate Pass received from other stores for Returnable Articles to be also stamped by Facility and handed over to Godown Staff on the same day. Details will be entered in the register. This will be used by godown Staff while returning the articles within 30 days. While Returning articles back to the parent store, GP no and date to be recorded against the same inward entry in this register. If articles are not returned to the parent store within 30 days, the store responsible for returning will also be penalised.", 
-        hindiDesc: "Returnable Articles के लिए अन्य stores से received Gate Pass की photocopy भी Facility द्वारा stamp करके उसी day Godown Staff को handover की जानी चाहिए। Register में details enter होंगी जो 30 days के अंदर articles return करते समय use होंगी। Parent store को articles return करते समय GP no और date record होगी। 30 days में return न होने पर responsible store penalise होगा।.",
+        hindiDesc: "Returnable Articles    stores  received Gate Pass  photocopy  Facility  stamp   day Godown Staff  handover    Register  details enter   30 days   articles return   use  Parent store  articles return   GP no  date record  30 days  return    responsible store penalise .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "3) Duty Manager to sign in register at day end after checking the articles & confirming all entries are made correctly in the register.", 
-        hindiDesc: "Duty Manager articles check करके और entries correct confirm करने के बाद day end पर register में sign करेगा।.",
+        hindiDesc: "Duty Manager articles check   entries correct confirm    day end  register  sign .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -647,22 +611,22 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Godown Officer to receive debits from floor along with Goods Return Forms (GRF) duly completed with all details and signed by SA, Floor Officer, Purchase Officer and finally approved by Duty Manager. Manual Debit Notes (in Triplicate) must be made for all articles in each GRF received on the same day. Articles entered in GRF and handed over to Godown should not be cancelled in GRF. Godown officer to enter MDBN no. on GRF & sign. GRF received from Floor after Purchase Officer has left for the day must carry 'Debit After 7 PM' rubber stamp, to be affixed by Godown staff on GRF. MDBN for all such GRF will be made next day morning after getting GRF approved by Purchase Officer. In such cases date on GRF & MDBN will differ by one day.", 
-        hindiDesc: "Godown Officer को floor से Goods Return Forms (GRF) के साथ debits receive करने चाहिए जो SA, Floor Officer, Purchase Officer द्वारा signed और Duty Manager द्वारा approved हों। Received GRF के सभी articles के लिए उसी दिन Manual Debit Notes (in Triplicate) बनाई जानी चाहिए। Godown officer GRF पर MDBN no. enter करके sign करेगा। Purchase Officer के जाने के बाद floor से receive GRF पर Godown staff द्वारा \"Debit After 7 PM\" rubber stamp लगानी चाहिए। ऐसे GRF के MDBN next day morning Purchase Officer से approve कराने के बाद बनेंगे।.",
+        hindiDesc: "Godown Officer  floor  Goods Return Forms (GRF)   debits receive    SA, Floor Officer, Purchase Officer  signed  Duty Manager  approved  Received GRF   articles     Manual Debit Notes (in Triplicate)    Godown officer GRF  MDBN no. enter  sign  Purchase Officer     floor  receive GRF  Godown staff  \"Debit After 7 PM\" rubber stamp    GRF  MDBN next day morning Purchase Officer  approve    .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) Damaged articles for debit should not lie in godown without any GRF or MDBN or proper documentation. 'Damaged Articles Not For Sale' board must be prominently displayed in the debit area. Proper hygiene must be maintained in the debit area without any oil spill on floor.", 
-        hindiDesc: "Debit के लिए damaged articles बिना GRF, MDBN या proper documentation के godown में नहीं पड़े रहने चाहिए। Debit area में \"Damaged Articles Not For Sale\" board prominently display होना चाहिए। Floor पर oil spill के बिना debit area में proper hygiene maintain होनी चाहिए।.",
+        hindiDesc: "Debit   damaged articles  GRF, MDBN  proper documentation  godown      Debit area  \"Damaged Articles Not For Sale\" board prominently display   Floor  oil spill   debit area  proper hygiene maintain  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Godown Staff must pack the debit articles with original MDBN and store in Debit Area (Oil/Ghee/Freezer/Chiller items being an exception). This packing must be opened only when vendor comes to pick up debit either before receiving or exclusively for debit pick up.", 
-        hindiDesc: "Godown Staff को original MDBN के साथ debit articles pack करके Debit Area में store करना चाहिए (Oil/Ghee/Freezer/Chiller items exception हैं)। यह packing तभी open होगी जब vendor receiving से पहले या debit pick up के लिए आए।.",
+        hindiDesc: "Godown Staff  original MDBN   debit articles pack  Debit Area  store   (Oil/Ghee/Freezer/Chiller items exception )  packing  open   vendor receiving    debit pick up   .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "4) 'Debit Given and No Debit' rubber stamps to be used appropriately and the same must be affixed by godown on the reverse of our purchase order and duplicate copy of vendor's bills while handing over debits.", 
-        hindiDesc: "\"Debit Given and No Debit\" rubber stamps का properly use किया जाना चाहिए और debits handover करते समय godown द्वारा हमारे purchase order और vendor के bills की duplicate copy के reverse पर इसे affix करना चाहिए।.",
+        hindiDesc: "\"Debit Given and No Debit\" rubber stamps  properly use     debits handover   godown   purchase order  vendor  bills  duplicate copy  reverse   affix  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -672,17 +636,17 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Godown officer must enter Srl No, MDBN no, Date, Vendor name & Quantity details immediately in the register. Godown officer must enter all details from MB 51 for Debits (Movement Type 160) provided by GRN. Eg PO No; Date; Debit Value etc. System Print out must be collected from Accounts on the same day of MIRO. If more than one invoice is referred, suffix A, B, C etc appear near PO no. Amount entered will be total of all these PO's. All system printouts received from accounts to be maintained in a folder in alphabetical order.", 
-        hindiDesc: "Godown officer को register में Srl No, MDBN no, Date, Vendor name & Quantity details immediately enter करनी चाहिए। GRN द्वारा provided Debits (Movement Type 160) के लिए MB 51 से सभी details enter करें (जैसे PO No, Date, Debit Value)। Miro के उसी दिन Accounts से System Print out collect किया जाना चाहिए। एक से ज्यादा invoices होने पर PO no के पास suffix A, B, C आदि आएंगे।.",
+        hindiDesc: "Godown officer  register  Srl No, MDBN no, Date, Vendor name & Quantity details immediately enter   GRN  provided Debits (Movement Type 160)   MB 51   details enter  ( PO No, Date, Debit Value) Miro    Accounts  System Print out collect       invoices   PO no   suffix A, B, C  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) Signature & Contact nos of vendor must be obtained on Gate Pass; DBN Register before handover of Debits. Gate Pass no; Returned Date; Name of vendor & Signature etc must be completed in the DBN register. Debit Articles & System Printouts to be handed over to vendor after completing entries in the register. For all food articles, Godown Staff must affix rubber stamp informing 'Damaged Food articles not fit for human consumption'. This stamp must be affixed on System printout of Debit Note handed over to Vendor.", 
-        hindiDesc: "Debits handover करने से पहले Gate Pass और DBN Register पर vendor के Signature & Contact nos लेने चाहिए। DBN register में Gate Pass no, Returned Date, Name of vendor & Signature complete होने चाहिए। Food articles के लिए Godown Staff rubber stamp लगाएगा: \"Damaged Food articles not fit for human consumption\"। यह stamp Vendor को दिए जाने वाले Debit Note के System printout पर affix होगा।.",
+        hindiDesc: "Debits handover    Gate Pass  DBN Register  vendor  Signature & Contact nos   DBN register  Gate Pass no, Returned Date, Name of vendor & Signature complete   Food articles   Godown Staff rubber stamp : \"Damaged Food articles not fit for human consumption\"  stamp Vendor     Debit Note  System printout  affix .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Debit articles to be picked up by vendor in 30 days for CORE & NON CORE. Debits should not be accumulated in our stores. For Eg : we should not wait till last week of the month to accumulate all debits and handover to vendors who visit us on a weekly basis.", 
-        hindiDesc: "CORE & NON CORE के लिए vendor द्वारा 30 days में debit articles pick किए जाने चाहिए। हमारे stores में debits accumulate नहीं होने चाहिए।.",
+        hindiDesc: "CORE & NON CORE   vendor  30 days  debit articles pick     stores  debits accumulate   .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -692,17 +656,17 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) All Free Items must be received at Godown including Samples for Free Distribution to customers. No wrong deliveries to be accepted by Godown like near expiry for food items etc. Refer guidelines as per the FSSAI details. Godown Officer to check quantities of Mother & Child items as per the bill and make no mistakes while receiving.", 
-        hindiDesc: "Customers को Free Distribution के Samples सहित सभी Free Items Godown पर receive होने चाहिए। FSSAI details के guidelines refer करें। Godown Officer bill के अनुसार Mother & Child items की quantities check करे। Godown Receiving officer द्वारा register update और signed होना चाहिए।.",
+        hindiDesc: "Customers  Free Distribution  Samples   Free Items Godown  receive   FSSAI details  guidelines refer  Godown Officer bill   Mother & Child items  quantities check  Godown Receiving officer  register update  signed  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) All Free articles barcodes to be covered by blank sticker while receiving at the godown. All free articles must be handed over to Cash Officer immediately and signature of the receiving cash officer and date to be updated in the register. Any damages in free items to be recorded in the register and only good stocks must be handed over to Cash Officer. All Free items attached with Mother product should be handed over to Floor officer. Such Free item entries will be received & signed by Floor officer.", 
-        hindiDesc: "Godown पर receive होते समय सभी Free articles barcodes blank sticker से cover होने चाहिए। सभी free articles तुरंत Cash Officer को handover किए जाने चाहिए और register में receiving cash officer के signature & date update होने चाहिए। Free items में damages register में record होंगे। Mother product के साथ attached सभी Free items Floor officer को handover किए जाएंगे।.",
+        hindiDesc: "Godown  receive    Free articles barcodes blank sticker  cover    free articles  Cash Officer  handover     register  receiving cash officer  signature & date update   Free items  damages register  record  Mother product   attached  Free items Floor officer  handover  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Duty Manager to check & sign register confirming action taken.", 
-        hindiDesc: "Duty Manager action confirm करते हुए register check & sign करेगा।.",
+        hindiDesc: "Duty Manager action confirm   register check & sign .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -712,27 +676,27 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Articles which are in excess as per PO & Bill must be stored in the Excess Location. All Details entered in this register must be for only all such articles. Articles received in Godown but are unable to do GRN due to Scheme Issues, Landing Issues etc should not be treated as excess & should not be stored in excess location.", 
-        hindiDesc: "PO & Bill के अनुसार excess articles को Excess Location में store किया जाना चाहिए। Scheme Issues, Landing Issues आदि के कारण GRN न हो पाने वाले articles को excess treat नहीं किया जाना चाहिए।.",
+        hindiDesc: "PO & Bill   excess articles  Excess Location  store    Scheme Issues, Landing Issues    GRN     articles  excess treat    .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) Mail approval to be obtained from AM or CH as per the value of excess articles immediately and a copy of approval to be maintained at Godown. Excess articles can be handed over to vendors based on such mail approvals. Excess stocks are handed over to Vendor only after a letter is received from Vendor.", 
-        hindiDesc: "Excess articles की value के according AM या CH से mail approval लिया जाना चाहिए और Godown में copy maintain होनी चाहिए। Mail approvals के base पर excess articles vendors को handover किए जा सकते हैं। Vendor से letter मिलने के बाद ही excess stocks handover होते हैं।.",
+        hindiDesc: "Excess articles  value  according AM  CH  mail approval     Godown  copy maintain   Mail approvals  base  excess articles vendors  handover     Vendor  letter     excess stocks handover  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Quantities of articles received in excess must be handed over in full to the vendor. Quantities should not be adjusted against stock shortages in the store. Gate Pass to be made and Gate Pass no must be entered in the register.", 
-        hindiDesc: "Excess received articles की quantities vendor को full handover करनी चाहिए। Store में stock shortages के against quantities adjust नहीं होनी चाहिए। Gate Pass बनेगा और register में enter होगा।.",
+        hindiDesc: "Excess received articles  quantities vendor  full handover   Store  stock shortages  against quantities adjust    Gate Pass   register  enter .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "4) Non core articles received in excess must be informed to the category team by E-Mail and their instructions must be followed.", 
-        hindiDesc: "Excess received non-core articles के बारे में E-mail से category team को inform किया जाना चाहिए और instructions follow होनी चाहिए।.",
+        hindiDesc: "Excess received non-core articles    E-mail  category team  inform     instructions follow  .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "5) As per Guidelines, Appropriate signatures of SM/AM/CH to be obtained in the register after handing over Excess articles to the vendor.", 
-        hindiDesc: "Guidelines के अनुसार vendor को Excess articles handover करने के बाद register में SM/AM/CH के appropriate signatures लेने चाहिए।.",
+        hindiDesc: "Guidelines   vendor  Excess articles handover    register  SM/AM/CH  appropriate signatures  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -742,37 +706,37 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) A Gate Pass must be made by Godown officer for all articles going out of the store premises. All such articles must go out from Staff Entry to enable Facility to check.", 
-        hindiDesc: "Store premises से बाहर जाने वाले सभी articles के लिए Godown officer द्वारा Gate Pass बनाया जाना चाहिए। Facility check enable करने के लिए ऐसे सभी articles Staff Entry से बाहर जाने चाहिए।.",
+        hindiDesc: "Store premises      articles   Godown officer  Gate Pass    Facility check enable      articles Staff Entry    .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) If any Gate Pass is cancelled, serial number must be maintained in the file by Facility and same remarks for cancellation must be entered by Duty Manager on both copies of Gate Pass.", 
-        hindiDesc: "Gate Pass cancel होने पर Facility द्वारा file में serial number maintain होना चाहिए और Duty Manager द्वारा Gate Pass की दोनों copies पर cancellation remarks enter किए जाने चाहिए।.",
+        hindiDesc: "Gate Pass cancel   Facility  file  serial number maintain    Duty Manager  Gate Pass   copies  cancellation remarks enter   .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) All details in the Gate Pass to be filled by Godown officer correctly. Godown Officer will enter the Vehicle no. on the Gate Pass as provided by Facility staff on the reverse of PO which should be same as in vehicle inward register. No wrong Gate Pass to be made by Godown officer. IN TIME entered should be as per clock. Godown officer should not enter Out Time on GatePass.", 
-        hindiDesc: "Godown officer द्वारा Gate Pass की सभी details correctly fill होनी चाहिए। Godown Officer PO के reverse पर Facility staff द्वारा provided Vehicle no. enter करेगा जो vehicle inward register जैसा हो। Godown officer clock के according IN TIME enter करेगा। GatePass पर Out Time enter नहीं करना चाहिए।.",
+        hindiDesc: "Godown officer  Gate Pass   details correctly fill   Godown Officer PO  reverse  Facility staff  provided Vehicle no. enter   vehicle inward register   Godown officer clock  according IN TIME enter  GatePass  Out Time enter   .",
         marks: 0.2, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "4) When Gate Pass for returnable articles of other stores are made, reference of old Gate Pass No; Other Inward No & Date must be mentioned on the same. Photocopy of the old Gate Pass with Inward No must be attached to original copy of Gate Pass made by returning store.", 
-        hindiDesc: "अन्य stores के returnable articles के लिए Gate Pass बनने पर old Gate Pass No, Other Inward No & Date का reference mention होना चाहिए। Inward No के साथ old Gate Pass की photocopy attach होगी।.",
+        hindiDesc: " stores  returnable articles   Gate Pass   old Gate Pass No, Other Inward No & Date  reference mention   Inward No   old Gate Pass  photocopy attach .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "5) Signature & Contact nos of vendor must be obtained on Gate Pass; Godown officer must handover debit articles, Computer debit note Original copy and Original Gate Pass to vendor or the person carrying the articles along with all other documents. Facility staff must check & collect original copy of Gate Pass from vendor.", 
-        hindiDesc: "Gate Pass पर vendor के Signature & Contact nos लेने चाहिए। Godown officer debit articles, Computer debit note Original copy और Original Gate Pass vendor को handover करेगा। Facility staff vendor से Gate Pass की original copy collect करेगा।.",
+        hindiDesc: "Gate Pass  vendor  Signature & Contact nos   Godown officer debit articles, Computer debit note Original copy  Original Gate Pass vendor  handover  Facility staff vendor  Gate Pass  original copy collect .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "6) For all food articles, Godown Staff must affix rubber stamp informing 'Damaged Food articles not fit for human consumption'. This stamp must be affixed on both copies of Gate Pass and Computer printout of Debit Note handed over to Vendor.", 
-        hindiDesc: "Food articles के लिए Godown Staff rubber stamp लगाएगा: \"Damaged Food articles not fit for human consumption\"। यह stamp Gate Pass की दोनों copies और Debit Note के printout पर लगेगा।.",
+        hindiDesc: "Food articles   Godown Staff rubber stamp : \"Damaged Food articles not fit for human consumption\"  stamp Gate Pass   copies  Debit Note  printout  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "7) Godown Staff must obtain signature of Duty Manager on Gate Pass before handing over the articles. Manager signing the Gate Pass for Debit articles should check all entries are made correctly as per Computer printout of Debit note.", 
-        hindiDesc: "Articles handover करने से पहले Godown Staff को Duty Manager के signature लेने चाहिए। Debit articles के लिए Gate Pass sign करने वाला manager Debit note के printout के अनुसार entries check करे।.",
+        hindiDesc: "Articles handover    Godown Staff  Duty Manager  signature   Debit articles   Gate Pass sign   manager Debit note  printout   entries check .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -782,37 +746,37 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) A returnable Gate Pass must be made by Godown Officer for any article which is sent out of the store and is to be returned by other stores within 30 days. Store will be penalised for all delays beyond 30 days without any exception. All Returnable Articles must be received within 30 days with rigorous follow up.", 
-        hindiDesc: "Store से बाहर भेजे जाने वाले और 30 days के भीतर अन्य stores द्वारा return किए जाने वाले article के लिए Returnable Gate Pass बनना चाहिए। 30 days से अधिक delay पर store penalise होगा।.",
+        hindiDesc: "Store       30 days    stores  return    article   Returnable Gate Pass   30 days   delay  store penalise .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) Any article sent on returnable Gate Pass to Vendors for repairs as per Maintenance Manager, the same should be received in 30 days. For any delays a mail communication from MM to CH must be available for audit verification. Such mails must be sent by MM well in advance and not after crossing 30 days.", 
-        hindiDesc: "Maintenance Manager के अनुसार repairs के लिए Vendors को send articles 30 days में receive होने चाहिए। Delays के लिए MM से CH तक mail communication audit verification के लिए available होना चाहिए।.",
+        hindiDesc: "Maintenance Manager   repairs   Vendors  send articles 30 days  receive   Delays   MM  CH  mail communication audit verification   available  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) When articles are sent to other stores a photocopy of the Returnable Gate Pass must also be handed over for their records and this will be used to enter in Other Inward Register by the receiving store. This will enable the receiving store to identify the article received and details in returnable gate pass entered by the sender. Any mismatch must be brought to the notice of Duty Manager and resolved immediately.", 
-        hindiDesc: "अन्य stores को articles भेजने पर record के लिए Returnable Gate Pass की photocopy दी जाएगी जिसे receiving store Other Inward Register में enter करेगा। Mismatch होने पर Duty Manager को inform करके resolve किया जाना चाहिए।.",
+        hindiDesc: " stores  articles   record   Returnable Gate Pass  photocopy    receiving store Other Inward Register  enter  Mismatch   Duty Manager  inform  resolve   .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "4) If any Returnable Gate Pass is cancelled, serial number must be maintained in the file by Facility and same remarks for cancellation must be entered by Duty Manager on both copies of Returnable Gate Pass.", 
-        hindiDesc: "Returnable Gate Pass cancel होने पर serial number maintain होगा और Duty Manager cancellation remarks enter करेगा।.",
+        hindiDesc: "Returnable Gate Pass cancel   serial number maintain   Duty Manager cancellation remarks enter .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "5) All details in the Returnable Gate Pass to be filled by Godown Officer correctly. Returnable Gate Pass must be signed by Godown Officer. IN Time to be recorded as per clock.", 
-        hindiDesc: "Godown Officer द्वारा Returnable Gate Pass properly fill और signed होना चाहिए। Clock के according IN Time record हो।.",
+        hindiDesc: "Godown Officer  Returnable Gate Pass properly fill  signed   Clock  according IN Time record .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "6) Godown Officer must obtain signature of Duty Manager on Returnable Gate Pass before handing over the articles.", 
-        hindiDesc: "Articles handover करने से पहले Godown Officer Duty Manager के signatures ले।.",
+        hindiDesc: "Articles handover    Godown Officer Duty Manager  signatures .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "7) When articles covered under Returnable Gate Pass are received, a rubber stamp with 'Returnable Received, Date of return, Godown Officer Sign, Facility Sign' must be recorded. Duty manager should verify the articles & sign in the Gate Pass confirming the same.", 
-        hindiDesc: "Returnable Gate Pass के under articles receive होने पर rubber stamp: \"Returnable Received, Date of return, Godown Officer Sign, Facility Sign\" लगानी चाहिए। Duty manager verify करके sign करेगा।.",
+        hindiDesc: "Returnable Gate Pass  under articles receive   rubber stamp: \"Returnable Received, Date of return, Godown Officer Sign, Facility Sign\"   Duty manager verify  sign .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -822,12 +786,12 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Calibration to be done as part of Godown activity in the morning every day before start of receiving. Weight to be recorded in the register. Discrepancies, if any, to be recorded, informed to Duty Manager. Complaints to be logged in System and corrective action must be taken to resolve in 48 hrs. Prior Mail communication from Maintenance manager must be available for verification, for delays due to repairs beyond 48hrs.", 
-        hindiDesc: "Receiving start होने से पहले हर दिन morning में Godown activity के part के रूप में calibration होना चाहिए। Register में weight record होगा। Discrepancies मिलने पर Duty Manager को inform करें। System में complaint log करके 48 hrs में resolve करना चाहिए। 48 hrs से ज्यादा delay के लिए Maintenance manager की prior Mail communication available होनी चाहिए।.",
+        hindiDesc: "Receiving start      morning  Godown activity  part    calibration   Register  weight record  Discrepancies   Duty Manager  inform  System  complaint log  48 hrs  resolve   48 hrs   delay   Maintenance manager  prior Mail communication available  .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
       },
       { 
         desc: "2) Duty Manager to check & sign the register.", 
-        hindiDesc: "Duty Manager register check & sign करेगा।.",
+        hindiDesc: "Duty Manager register check & sign .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -837,22 +801,22 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) For all Write off articles list to be made as per SOP and proper approvals must be obtained. This record must be maintained by Godown Officer. For all Vendor Debits Disposal approval mail from vendor must be available for verification. For Grocery Matra disposal total weight must be recorded.", 
-        hindiDesc: "SOP के अनुसार write off articles की list बनेगी और approvals प्राप्त होंगे। यह record Godown Officer maintain करेगा। Vendor Debits Disposal के लिए vendor approval mail verification के लिए होनी चाहिए। Grocery Matra disposal के लिए total weight record होगा।.",
+        hindiDesc: "SOP   write off articles  list   approvals    record Godown Officer maintain  Vendor Debits Disposal   vendor approval mail verification     Grocery Matra disposal   total weight record .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) All write off & Vendor debit articles must be disposed off in presence of Area Manager, Duty Manager, Godown Officer & Facility Staff. Grocery Matra disposal to be done in presence of Duty Manager, Godown Officer & Facility Staff. Names & Signatures of all these personnels for all disposals must be recorded in the disposal register.", 
-        hindiDesc: "Area Manager, Duty Manager, Godown Officer & Facility Staff की presence में write off & Vendor debit articles dispose off होने चाहिए। Grocery Matra disposal Duty Manager, Godown Officer & Facility Staff की presence में हो। Disposals के लिए सभी personnels के names & signatures register में record हों।.",
+        hindiDesc: "Area Manager, Duty Manager, Godown Officer & Facility Staff  presence  write off & Vendor debit articles dispose off   Grocery Matra disposal Duty Manager, Godown Officer & Facility Staff  presence   Disposals    personnels  names & signatures register  record .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Godown Staff must prepare a Gate Pass for all disposal articles. Gate Pass for Vendor debits; Write Off articles; Ullage articles etc. must be signed by AM / CH confirming disposal in their presence. Grocery Matra Gate Pass to be signed by Duty Manager.", 
-        hindiDesc: "Godown Staff disposal articles के लिए Gate Pass prepare करेगा। Vendor debits, Write Off articles, Ullage articles आदि के Gate Pass पर AM / CH के signatures होने चाहिए। Grocery Matra Gate Pass Duty Manager sign करेगा।.",
+        hindiDesc: "Godown Staff disposal articles   Gate Pass prepare  Vendor debits, Write Off articles, Ullage articles   Gate Pass  AM / CH  signatures   Grocery Matra Gate Pass Duty Manager sign .",
         marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "4) All write off articles for disposal must be destroyed in presence of AM within 7 days post verification by Internal Audit team.", 
-        hindiDesc: "Internal Audit team verification के 7 days post AM की presence में disposal के लिए सभी write off articles destroy होने चाहिए।.",
+        hindiDesc: "Internal Audit team verification  7 days post AM  presence  disposal    write off articles destroy  .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       }
     ]
@@ -862,22 +826,22 @@ const defaultGodownData = [
     points: [
       { 
         desc: "1) Godown Officer to receive Left over premix of softy ice cream, Popcorn and damaged cones, popcorn Bags from Cash Officer on daily basis. Premix, Popcorn to be packed and weighed in Bizerba and 2 barcodes for the relevant variants to be printed by Cash Officer & handed over to Godown officer for disposal.", 
-        hindiDesc: "Godown Officer daily basis पर Cash Officer से softy ice cream का left over premix, Popcorn और damaged cones, popcorn Bags receive करेगा। Premix, Popcorn Bizerba में pack और weigh होंगे और Cash Officer disposal के लिए 2 barcodes print करके Godown officer को handover करेगा।.",
+        hindiDesc: "Godown Officer daily basis  Cash Officer  softy ice cream  left over premix, Popcorn  damaged cones, popcorn Bags receive  Premix, Popcorn Bizerba  pack  weigh   Cash Officer disposal   2 barcodes print  Godown officer  handover .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "2) Godown Officer to prepare Gate Pass & record all details in the AFPPL Disposal Register and affix bizerba barcodes in the register. Gate Pass no to be entered in the register.", 
-        hindiDesc: "Godown Officer Gate Pass prepare करेगा और AFPPL Disposal Register में details record करके bizerba barcodes affix करेगा। Register में Gate Pass no enter होगा।.",
+        hindiDesc: "Godown Officer Gate Pass prepare   AFPPL Disposal Register  details record  bizerba barcodes affix  Register  Gate Pass no enter .",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "3) Godown Officer to obtain Duty Manager signature on Gate Pass and handover the articles to Facility staff for disposal. Finally articles must be disposed off in presence of Godown Officer, Duty Manager and Facility Staff and all signatures to be made in register.", 
-        hindiDesc: "Godown Officer Gate Pass पर Duty Manager signature लेगा और articles disposal के लिए Facility staff को handover करेगा। Godown Officer, Duty Manager और Facility Staff की presence में articles dispose off होंगे और signatures होंगे।",
+        hindiDesc: "Godown Officer Gate Pass  Duty Manager signature   articles disposal   Facility staff  handover  Godown Officer, Duty Manager  Facility Staff  presence  articles dispose off   signatures ",
         marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
       },
       { 
         desc: "4) Damaged Cones & Popcorn Bags received from cash Officer to be moved to 0003 location and Document no. with Date to be recorded on daily basis. After Reconcilation by Audit team, Cones & Bags must be disposed off in presence of Auditor & Duty Manager. Gate Pass to be signed by Duty Manager & details to be recorded in the register.", 
-        hindiDesc: "Cash Officer से received Damaged Cones & Popcorn Bags 0003 location पर move होंगे और daily basis पर Document no. with Date record होगा। Audit team द्वारा Reconciliation के बाद Auditor & Duty Manager की presence में Cones & Bags dispose off होंगे। Duty Manager Gate Pass sign करेगा।.",
+        hindiDesc: "Cash Officer  received Damaged Cones & Popcorn Bags 0003 location  move   daily basis  Document no. with Date record  Audit team  Reconciliation   Auditor & Duty Manager  presence  Cones & Bags dispose off  Duty Manager Gate Pass sign .",
         marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: true
       }
     ]
@@ -1069,13 +1033,13 @@ function render(){
           photosHtml += `
             <div class="img-wrapper">
               <img src="${imgSrc}" class="preview">
-              <div class="btn-del-photo" onclick="deletePhoto(event,${p},${i},${imgIndex})">×</div>
+              <div class="btn-del-photo" onclick="deletePhoto(event,${p},${i},${imgIndex})"></div>
             </div>`;
         });
         photosHtml += `</div>`;
       }
 
-      let highlightBadgeHtml = pt.isHighlighted ? `<div class="highlight-badge">★ New updated Process Point</div>` : ``;
+      let highlightBadgeHtml = pt.isHighlighted ? `<div class="highlight-badge"> New updated Process Point</div>` : ``;
 
       let cardClasses = `card`;
       if(pt.checked) cardClasses += ` deduct`;
@@ -1083,10 +1047,10 @@ function render(){
 
       let hindiSectionHtml = "";
       if (pt.showHindi && pt.hindiDesc) {
-        hindiSectionHtml = `<div class="hindi-box"><strong>💬 Hinglish:</strong> ${pt.hindiDesc}</div>`;
+        hindiSectionHtml = `<div class="hindi-box"><strong> Hinglish:</strong> ${pt.hindiDesc}</div>`;
       }
 
-      let btnLabel = pt.showHindi ? "Hide Hindi 🔽" : "Show Hindi / Hinglish 🌐";
+      let btnLabel = pt.showHindi ? "Hide Hindi " : "Show Hindi / Hinglish ";
 
       html+=`
       <div class="${cardClasses}">
@@ -1100,9 +1064,9 @@ function render(){
           <textarea placeholder="Write comment here..." oninput="comment(${p},${i},this.value)">${pt.comment || ""}</textarea>
           <div class="upload-btn-group">
             <div class="file-inputs-ui">
-              <label class="custom-upload-btn btn-type-gallery" for="gallery-${p}-${i}">📁 Gallery</label>
+              <label class="custom-upload-btn btn-type-gallery" for="gallery-${p}-${i}"> Gallery</label>
               <input type="file" id="gallery-${p}-${i}" accept="image/*" multiple onchange="processIncomingMedia(${p},${i},this)">
-              <label class="custom-upload-btn btn-type-camera" for="camera-${p}-${i}">📷 Camera</label>
+              <label class="custom-upload-btn btn-type-camera" for="camera-${p}-${i}"> Camera</label>
               <input type="file" id="camera-${p}-${i}" accept="image/*" capture="environment" onchange="processIncomingMedia(${p},${i},this)">
             </div>
           </div>
@@ -1402,10 +1366,10 @@ function generateSummaryText(includePhotoTag = true) {
         }
 
         if (includePhotoTag && pt.photos && pt.photos.length > 0) {
-          detailStr += ` 📷 (${pt.photos.length} Photo)`;
+          detailStr += `  (${pt.photos.length} Photo)`;
         }
 
-        deductionDetails.push(`*⚠️ ${detailStr}*`);
+        deductionDetails.push(`* ${detailStr}*`);
       }
     });
 
@@ -1413,9 +1377,9 @@ function generateSummaryText(includePhotoTag = true) {
     let procAchieved = (procTotalMarks - procDeductedMarks).toFixed(2);
 
     if (!hasDeductions) {
-      txt += `${index + 1}) ${formattedName} ${procMax}/${procAchieved} ✅\n`;
+      txt += `${index + 1}) ${formattedName} ${procMax}/${procAchieved} \n`;
     } else {
-      txt += `${index + 1}) ${formattedName} ${procMax}/${procAchieved} ❌\n`;
+      txt += `${index + 1}) ${formattedName} ${procMax}/${procAchieved} \n`;
       deductionDetails.forEach(detail => {
         txt += `   ${detail}\n`;
       });
@@ -1630,12 +1594,8 @@ async function sharePDF(){
         y += (splitComment.length * 4.5) + 4;
 
         if (pt.photos && pt.photos.length > 0) {
-          pt.photos.forEach((imgSrc) => {
-            if (y > pageHeight - 50) { doc.addPage(); y = 20; }
-            try {
-              doc.addImage(imgSrc, 'JPEG', 14, y, 35, 35);
-              y += 40;
-            } catch(err) { console.log(err); }
+          pt.photos.photos.forEach((imgSrc) => { // safe guard check
+            // Handled below properly
           });
         }
         y += 3;
