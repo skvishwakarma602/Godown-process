@@ -845,6 +845,14 @@ const defaultGodownData = [
   }
 ];
 
+function formatTitleCase(str) {
+  if (!str) return "";
+  return str.toLowerCase().split(' ').map(word => {
+    if (!word) return "";
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+}
+
 function saveData(){ 
   try {
     localStorage.setItem("auditDataGodan2026_v16", JSON.stringify(data));
@@ -866,6 +874,7 @@ function loadData(){
           if(!pt.photos) pt.photos = [];
           if(pt.showHindi === undefined) pt.showHindi = false;
           if(pt.isHighlighted === undefined) pt.isHighlighted = false;
+          if(pt.comment) pt.comment = pt.comment.trim();
         });
       });
     } else {
@@ -1072,7 +1081,7 @@ function render(){
 
 function toggleSection(i){ openSections[i]=!openSections[i]; render(); }
 function toggle(p,i){ data[p].points[i].checked=!data[p].points[i].checked; render(); calc(); renderReport(); saveData(); }
-function comment(p,i,val){ data[p].points[i].comment=val; renderReport(); saveData(); }
+function comment(p,i,val){ data[p].points[i].comment=val ? val.trim() : ""; renderReport(); saveData(); }
 
 function processIncomingMedia(p, i, input) {
   if (!input.files || input.files.length === 0) return;
@@ -1251,7 +1260,7 @@ function renderReport(){
     });
   });
   for(let sec in sectionTotals){
-    html+=`<div class="comment-box">${sec} : -${Number(sectionTotals[sec]).toFixed(2)} Marks</div>`;
+    html+=`<div class="comment-box">${formatTitleCase(sec)} : -${Number(sectionTotals[sec]).toFixed(2)} Marks</div>`;
   }
   let totalDeductFormatted = Number(total).toFixed(2);
   let finalScoreFormatted = Number(TOTAL_MAX - total).toFixed(2);
@@ -1279,7 +1288,7 @@ function shareReport(){
   });
 
   for(let sec in sectionTotals){ 
-    txt += `*${count}:${sec} ${Number(sectionTotals[sec]).toFixed(2)} : -${Number(sectionTotals[sec]).toFixed(2)}*\n`; 
+    txt += `*${count}:${formatTitleCase(sec)} ${Number(sectionTotals[sec]).toFixed(2)} : -${Number(sectionTotals[sec]).toFixed(2)}*\n`; 
     count++; 
   }
   
@@ -1294,12 +1303,13 @@ function shareReport(){
   data.forEach(proc => {
     proc.points.forEach((pt, i) => {
       if(pt.checked){
-        let cleanDesc = pt.desc.replace(/<[^>]*>/g, '');
-        txt += `*Point: ${proc.name} ${Number(pt.marks).toFixed(2)}*\n`;
+        let cleanDesc = pt.desc.replace(/<[^>]*>/g, '').trim();
+        txt += `*Point: ${formatTitleCase(proc.name)} ${Number(pt.marks).toFixed(2)}*\n`;
         txt += `${i + 1}) ${cleanDesc}\n`;
         txt += `*Deduction Marks : -${Number(pt.marks).toFixed(2)} MARKS*\n`;
-        if(pt.comment){
-          txt += `*Deduct Point : ${pt.comment}*\n`;
+        let cleanComment = pt.comment ? pt.comment.trim() : "";
+        if(cleanComment){
+          txt += `*Deduct Point : ${cleanComment}*\n`;
         } else {
           txt += `*Deduct Point : *\n`;
         }
@@ -1311,20 +1321,32 @@ function shareReport(){
   window.location.href = "https://wa.me/?text=" + encodeURIComponent(txt);
 }
 
-function shareSummaryWhatsApp(){
+function dataURLtoFile(dataurl, filename) {
+  let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+  while(n--){
+      u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, {type:mime});
+}
+
+async function shareSummaryWhatsApp(){
   const now = new Date();
   const dateFormatted = now.toLocaleDateString('en-GB');
   
   let txt = `*Godown Process*\n   *Date:- ${dateFormatted}*\n\n`;
   
   let totalDeductions = 0;
-  let totalPhotosAttached = 0;
+  let allAttachedFiles = [];
+  let fileCount = 1;
 
   data.forEach((proc, index) => {
     let procTotalMarks = 0;
     let procDeductedMarks = 0;
     let hasDeductions = false;
     let deductionDetails = [];
+
+    let formattedName = formatTitleCase(proc.name).trim();
 
     proc.points.forEach((pt, ptIndex) => {
       let m = Number(pt.marks);
@@ -1335,20 +1357,27 @@ function shareSummaryWhatsApp(){
         procDeductedMarks += m;
         totalDeductions += m;
 
+        let cleanComment = pt.comment ? pt.comment.trim() : "";
         let detailStr = "";
-        if (pt.comment && pt.comment.trim() !== "") {
-          detailStr = pt.comment.trim();
+        
+        if (cleanComment !== "") {
+          detailStr = cleanComment;
         } else {
-          let cleanDesc = pt.desc.replace(/<[^>]*>/g, '');
+          let cleanDesc = pt.desc.replace(/<[^>]*>/g, '').trim();
           detailStr = cleanDesc.length > 50 ? cleanDesc.substring(0, 47) + "..." : cleanDesc;
         }
 
         if (pt.photos && pt.photos.length > 0) {
-          totalPhotosAttached += pt.photos.length;
-          detailStr += ` 📷 (${pt.photos.length} Photo attached)`;
+          pt.photos.forEach((imgData) => {
+            try {
+              let f = dataURLtoFile(imgData, `Godown_Audit_Proof_${fileCount}.jpg`);
+              allAttachedFiles.push(f);
+              fileCount++;
+            } catch(e) { console.log(e); }
+          });
         }
 
-        deductionDetails.push(`${ptIndex + 1}) ${detailStr}`);
+        deductionDetails.push(`*⚠️ ${detailStr}*`);
       }
     });
 
@@ -1356,9 +1385,9 @@ function shareSummaryWhatsApp(){
     let procAchieved = (procTotalMarks - procDeductedMarks).toFixed(2);
 
     if (!hasDeductions) {
-      txt += `${index + 1}) ${proc.name} ${procMax}/${procAchieved} ✅\n`;
+      txt += `${index + 1}) ${formattedName} ${procMax}/${procAchieved} ✅\n`;
     } else {
-      txt += `${index + 1}) ${proc.name} ${procMax}/${procAchieved} ❌\n`;
+      txt += `${index + 1}) ${formattedName} ${procMax}/${procAchieved} ❌\n`;
       deductionDetails.forEach(detail => {
         txt += `   ${detail}\n`;
       });
@@ -1368,10 +1397,19 @@ function shareSummaryWhatsApp(){
   let totalMaxFormatted = TOTAL_MAX.toFixed(2);
   let totalAchievedFormatted = (TOTAL_MAX - totalDeductions).toFixed(2);
 
-  txt += `\n*Total :- ${totalMaxFormatted}/${totalAchievedFormatted}*\n`;
+  txt += `\n*Total :- ${totalMaxFormatted}/${totalAchievedFormatted}*`;
 
-  if (totalPhotosAttached > 0) {
-    txt += `\n📌 *Note:* ${totalPhotosAttached} photo(s) attached in detailed audit app inspection.`;
+  if (navigator.share && allAttachedFiles.length > 0 && navigator.canShare && navigator.canShare({ files: allAttachedFiles })) {
+    try {
+      await navigator.share({
+        title: 'Godown Process Summary',
+        text: txt,
+        files: allAttachedFiles
+      });
+      return;
+    } catch (err) {
+      console.log("Native Share Dismissed", err);
+    }
   }
 
   window.location.href = "https://wa.me/?text=" + encodeURIComponent(txt);
@@ -1387,7 +1425,7 @@ async function exportToExcel(){
   ];
   data.forEach(proc => {
     proc.points.forEach((pt, idx) => {
-      reportRows.push([proc.name, pt.desc.replace(/<[^>]*>/g, ''), Number(pt.marks).toFixed(2), pt.checked ? "DEDUCT" : "OK", pt.comment || "", pt.isHighlighted ? "YES" : "NO"]);
+      reportRows.push([formatTitleCase(proc.name), pt.desc.replace(/<[^>]*>/g, '').trim(), Number(pt.marks).toFixed(2), pt.checked ? "DEDUCT" : "OK", pt.comment ? pt.comment.trim() : "", pt.isHighlighted ? "YES" : "NO"]);
     });
   });
   let totalDeduct = 0;
@@ -1479,7 +1517,7 @@ async function sharePDF(){
   doc.setFont("Helvetica", "normal");
   let count = 1;
   for (let sec in sectionTotals) {
-    doc.text(`${count}. ${sec}`, 18, boxY);
+    doc.text(`${count}. ${formatTitleCase(sec)}`, 18, boxY);
     doc.text(`-${Number(sectionTotals[sec]).toFixed(2)} M`, pageWidth - 25, boxY, { align: "right" });
     boxY += 6;
     count++;
@@ -1512,17 +1550,17 @@ async function sharePDF(){
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(49, 130, 206);
-        doc.text(`${proc.name} (-${Number(pt.marks).toFixed(2)} M)`, 14, y);
+        doc.text(`${formatTitleCase(proc.name)} (-${Number(pt.marks).toFixed(2)} M)`, 14, y);
         y += 5;
 
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(45, 55, 72);
-        let cleanDesc = pt.desc.replace(/<[^>]*>/g, '');
+        let cleanDesc = pt.desc.replace(/<[^>]*>/g, '').trim();
         let splitDesc = doc.splitTextToSize(`${i + 1}) ${cleanDesc}`, pageWidth - 28);
         doc.text(splitDesc, 14, y);
         y += (splitDesc.length * 4.5) + 2;
 
-        let commentText = pt.comment ? `Deduct Point / Comment: ${pt.comment}` : `Deduct Point: `;
+        let commentText = pt.comment ? `Deduct Point / Comment: ${pt.comment.trim()}` : `Deduct Point: `;
         let splitComment = doc.splitTextToSize(commentText, pageWidth - 28);
         doc.setTextColor(229, 62, 62);
         doc.text(splitComment, 14, y);
