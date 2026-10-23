@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Audit App Godown Process 2026</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+
+  <!-- PWA & Standalone App Configuration -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Godown Audit">
+  
+  <!-- Embedded App Icon & Web Manifest -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%233182ce'/><path d='M150 240l75 75l138-138' fill='none' stroke='%23fff' stroke-width='40' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%233182ce'/><path d='M150 240l75 75l138-138' fill='none' stroke='%23fff' stroke-width='40' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  
+  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Audit%20App%20Godown%20Process%202026%22%2C%22short_name%22%3A%22Godown%20Audit%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23eef2f5%22%2C%22theme_color%22%3A%22%233182ce%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%253Csvg%2520xmlns%253D%2522http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg%2522%2520viewBox%253D%25220%25200%2520512%2520512%2522%253E%253Crect%2520width%253D%2522512%2522%2520height%253D%2522512%2522%2520rx%253D%2522112%2522%2520fill%253D%2522%25233182ce%2522%2F%253E%253Cpath%2520d%253D%2522M150%2520240l75%252075l138-138%2522%2520fill%253D%2522none%2522%2520stroke%253D%2522%2523fff%2522%2520stroke-width%253D%252240%2522%2520stroke-linecap%253D%2522round%2522%2520stroke-linejoin%253D%2522round%2522%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg+xml%22%7D%5D%7D'>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #eef2f5; 
+      --card-bg: #ffffff;
+      --card-deduct: #fee2e2; 
+      --border-deduct: #ef4444; 
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --accent-blue: #3182ce;
+      --accent-red: #e53e3e;
+      --accent-green: #38a169;
+      --border-color: #d1d5db;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .top {
+      position: sticky;
+      top: 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border-bottom: 2px solid var(--border-color);
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .app-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .app-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-blue);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(49, 130, 206, 0.4);
+      flex-shrink: 0;
+    }
+
+    .top h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .developer-tag {
+      font-size: 12px;
+      color: var(--accent-blue);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .container {
+      padding: 15px;
+      max-width: 800px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    h3.section-title {
+      font-size: 18px;
+      border-left: 4px solid var(--accent-blue);
+      padding-left: 10px;
+      margin: 20px 0 10px 0;
+      color: var(--text-main);
+    }
+
+    h4.proc-header {
+      margin: 12px 0;
+      background: #e2e8f0;
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    h4.proc-header:hover {
+      background: #cbd5e1;
+    }
+
+    .proc-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .proc-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      margin: 12px 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: stretch;
+      gap: 15px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      box-sizing: border-box;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    
+    .card.deduct {
+      background-color: var(--card-deduct) !important;
+      border-color: var(--border-deduct) !important;
+    }
+
+    .card.highlighted-point {
+      border: 2px dashed var(--accent-red);
+      background: #fff5f5;
+    }
+
+    .highlight-badge {
+      display: inline-block;
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      min-width: 75px;
+      text-align: right;
+      border-left: 1px solid var(--border-color);
+      padding-left: 12px;
+    }
+
+    .point-desc {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text-main);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      padding: 4px 0;
+    }
+
+    .hindi-box {
+      margin-top: 4px;
+      padding: 8px 10px;
+      background: #f0fdf4;
+      border-left: 3px solid var(--accent-green);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #166534;
+      font-weight: 500;
+      line-height: 1.4;
+      border: 1px solid #bbf7d0;
+    }
+
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      background: #fff;
+      color: var(--text-main);
+      font-family: inherit;
+      box-sizing: border-box;
+      resize: vertical;
+      font-size: 13px;
+    }
+
+    input[type="text"] {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .upload-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 5px;
+    }
+    
+    .file-inputs-ui {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .custom-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-type-gallery { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+    .btn-type-camera { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+
+    button {
+      background: #fff;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    button.btn-share { background: #25d366; color: #fff; border: none; }
+    button.btn-excel { background: #1f7244; color: #fff; border: none; }
+    button.btn-pdf { background: #e53e3e; color: #fff; border: none; }
+
+    .comment-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #ffe4e6;
+      border-left: 4px solid var(--accent-red);
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-red);
+      border: 1px solid var(--border-color);
+    }
+
+    .marks-highlight { font-size: 16px; font-weight: bold; color: var(--accent-red); }
+    .score-highlight { font-size: 16px; font-weight: bold; color: var(--accent-green); }
+
+    .total-box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      line-height: 1.6;
+    }
+
+    .preview-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 5px;
+    }
+    
+    .img-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    img.preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-del-photo {
+      position: absolute;
+      top: -5px; right: -5px;
+      background: var(--accent-red);
+      color: white;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      font-size: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .editor-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .editor-container {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      width: 95%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .canvas-wrapper {
+      position: relative;
+      max-width: 100%;
+      border: 2px dashed #cbd5e1;
+      background: #f8fafc;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .editor-controls {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      justify-content: center; align-items: center;
+      width: 100%;
+    }
+    .color-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .color-btn.active { transform: scale(1.2); border-color: #000; }
+  </style>
+</head>
+
+<body>
+
+<div class="top">
+  <div class="app-title-wrapper">
+    <div class="app-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div>
+      <h3>Audit App Godown Process 2026</h3>
+      <div class="developer-tag">Developed by Sk</div>
+    </div>
+  </div>
+
+  <div id="result" style="margin-bottom: 12px; font-size: 15px;"></div>
+
+  <div class="action-bar">
+    <input type="file" id="upload" accept=".xlsx, .xls" style="display:inline-block; max-width: 180px;">
+    <input type="text" id="search" placeholder="Search points..." oninput="render()">
+
+    <button onclick="filter='all';render()">All</button>
+    <button onclick="filter='deduct';render()">Deduct</button>
+    <button onclick="filter='highlighted';render()">New Updated</button>
+
+    <button class="btn-share" onclick="shareReport()">Share Text</button>
+    <button class="btn-excel" onclick="exportToExcel()">Share Excel</button>
+    <button class="btn-pdf" onclick="sharePDF()">Share PDF</button>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+  </div>
+</div>
+
+<div class="audit-container container" id="audit"></div>
+
+<div class="container">
+  <h3 class="section-title">Deduction Report</h3>
+  <div id="deductionReport"></div>
+</div>
+
+<div id="editorModal" class="editor-modal">
+  <div class="editor-container">
+    <h3 style="margin:0; font-size:16px;" id="modalTitle">Highlight Defect Area</h3>
+    <div class="editor-controls">
+      <div class="color-btn active" style="background:#ef4444;" onclick="setPenColor('#ef4444', this)"></div>
+      <div class="color-btn" style="background:#eab308;" onclick="setPenColor('#eab308', this)"></div>
+      <div class="color-btn" style="background:#3b82f6;" onclick="setPenColor('#3b82f6', this)"></div>
+      <button style="padding:4px 8px; font-size:11px;" onclick="resetCanvasDrawing()">Reset</button>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas id="editingCanvas"></canvas>
+    </div>
+    <div style="display:flex; gap:10px; width:100%;">
+      <button style="flex:1; background:#ef4444; color:white; border:none; padding:10px; font-weight:bold; border-radius:6px;" onclick="closeEditor()">Cancel</button>
+      <button style="flex:1; background:#22c55e; color:white; border:none; padding:10px; font-weight:bold; border-radius:6px;" id="btnSavePhoto" onclick="saveEditedPhoto()">Attach HD Photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data=[];
+let filter="all";
+let openSections={};
+const TOTAL_MAX=6.20;
+
+let currentPIndex = null;
+let currentPtIndex = null;
+let tempFileQueue = [];
+
+let canvas = document.getElementById('editingCanvas');
+let ctx = canvas.getContext('2d');
+
+let isDrawing = false;
+let penColor = '#ef4444'; 
+let baseImage = new Image();
+
+let scaleX = 1;
+let scaleY = 1;
+let drawingPaths = [];
+
+const defaultGodownData = [
+  {
+    name: "RECEIVING PROCESS",
+    points: [
+      { 
+        desc: "1) Receiving person must receive PO & Bill with Security Stamp. PO & Bill must be checked for correct store address before start of receiving. Samples along with PO & Invoice to be checked for all details like MRP, EAN, Grammage, Shelf Life, etc.", 
+        hindiDesc: "Receiving person को Security Stamp के साथ PO & Bill प्राप्त करना चाहिए। Receiving शुरू करने से पहले PO & Bill में correct store address की जांच करनी चाहिए। Samples को PO & Invoice के साथ MRP, EAN, Grammage, Shelf Life आदि सभी details के लिए check किया जाना चाहिए।.", 
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true 
+      },
+      { 
+        desc: "2) Debits to be handed over to vendor before the start of receiving.", 
+        hindiDesc: "Receiving शुरू करने से पहले Debits को vendor को सौंप दिया जाना चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Receiving person to make space available for new stocks and supervise the stacking of the entire new stock in the designated place in godown by the vendor. Enter details in Inward Register immediately after each receiving is complete & affix Inward stamp on Bill.", 
+        hindiDesc: "Receiving person को new stocks के लिए space available करना चाहिए और vendor द्वारा godown में designated place पर पूरे new stock की stacking को supervise करना चाहिए। प्रत्येक receiving complete होने के तुरंत बाद Inward Register में details enter करें और Bill पर Inward stamp लगाएं।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true 
+      },
+      { 
+        desc: "4) Handover sample basket, PO & Invoice to GRN after each receiving is entered in the register. Short receiving quantities must be corrected in both copies of Invoice.", 
+        hindiDesc: "Register में प्रत्येक receiving enter होने के बाद sample basket, PO & Invoice को GRN को handover करें। Invoice की दोनों copies में short receiving quantities को correct किया जाना चाहिए।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: true 
+      }
+    ]
+  },
+  {
+    name: "INWARD REGISTER",
+    points: [
+      { 
+        desc: "1) Entries in the Inward Registers made by Receiving Person immediately after receiving each PO/Bill. This is to avoid double entries for the same Inward No or entries made in wrong registers. Inward Nos to be serially entered. Nos to be continued in the same sequence with only month no changing - Eg 01/234 (last entry for Jan); 02/235 (1st entry for Feb) etc. Overwriting, Use of Whitener or blank stickers, etc should not be done to cover any wrong entries. For corrections a single line cancellation to be done and new details to be written above or below that particular entry. Only Quantity corrections should not be done.", 
+        hindiDesc: "प्रत्येक PO/Bill receive करने के तुरंत बाद Receiving Person द्वारा Inward Registers में entries की जाती हैं। यह उसी Inward No के लिए double entries या गलत registers में entry से बचने के लिए है। Inward Nos serial wise enter किए जाने चाहिए। Numbers उसी sequence में जारी रहेंगे जिसमें केवल month no change होगा - जैसे 01/234 (Jan की last entry); 02/235 (Feb की 1st entry) आदि। किसी भी wrong entry को cover करने के लिए overwriting, Whitener या blank stickers का use नहीं किया जाना चाहिए। Corrections के लिए एक single line cancellation किया जाना चाहिए और उस particular entry के ऊपर या नीचे new details write की जानी चाहिए। केवल Quantity corrections नहीं किए जाने चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: true 
+      },
+      { 
+        desc: "2) Separate Registers to be maintained for Core FMCG; Core Grocery (Pack & Loose with partition); Non Core (with partitions) : Garments; Hosiery; Footwear; Plastics; Stainless Steel; Bed&Bath; Seasonal; Stationery etc. Proper abbreviations for each section to be entered correctly. For FMCG : 01/001; Pack Grocery : 01/PG/001; Loose Grocery : 01/LG/001; Garments : 01/G/001; Footwear : 01/F/001; Hosiery : 01/H/001; Plastics : 01/P/001; Stainless Steel : 01/SS/001; Bed & Bath : 01/BB/001; Seasonal : 01/S/001; Stationery : 01/ST/001 etc.", 
+        hindiDesc: "Core FMCG; Core Grocery (Pack & Loose with partition); Non Core (with partitions) जैसे Garments; Hosiery; Footwear; Plastics; Stainless Steel; Bed & Bath; Seasonal; Stationery आदि के लिए अलग Registers maintain किए जाने चाहिए। प्रत्येक section के लिए proper abbreviations सही ढंग से enter किए जाने चाहिए। FMCG के लिए: 01/001; Pack Grocery के लिए: 01/PG/001; Loose Grocery के लिए: 01/LG/001; Garments के लिए: 01/G/001 आदि।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Receiving person must enter all details in the register including Vendor Name; PO no; Invoice No; Brief Description; Bill Quantity; Invoice Amount; Time; Name of receiver; Signature. Godown Officer to check & sign for entries made by Godown assistant. Receiving Officer to enter the correct Inward No on Invoice & PO. Entries must be made after completion of each receiving i.e. for each PO & Invoice & sample basket must be handed over to GRN immediately. This is to provide adequate time for GRN to make error free entries in the system.", 
+        hindiDesc: "Receiving person को register में Vendor Name, PO no, Invoice No, Brief Description, Bill Quantity, Invoice Amount, Time, Name of receiver, Signature सहित सभी details enter करनी चाहिए। Godown assistant द्वारा की गई entries को Godown Officer द्वारा check & sign किया जाना चाहिए। Receiving Officer को Invoice & PO पर correct Inward No enter करना चाहिए। प्रत्येक receiving complete होने के बाद entries की जानी चाहिए और sample basket तुरंत GRN को handover कर दी जानी चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "4) Godown Officer to check all entries in the inward register with MB 51 report provided by GRN every day and enter the correct GRN no & Date in the register. If any new GRN nos are observed in the inward sheet due to cancellations, new GRN nos to be entered in Inward Register after striking the old GRN nos. For Partial GRN, second GRN no., Quantity & Date must also be entered in the register. If any discrepancies are noticed, Godown Officer to verify the details with the hard copy of PO & Invoice, inform GRN for necessary corrections and enter correct details after informing the Duty Manager.", 
+        hindiDesc: "Godown Officer को हर दिन GRN द्वारा provide किए गए MB 51 report के साथ inward register की सभी entries को check करना चाहिए और register में correct GRN no & Date enter करनी चाहिए। Cancellations के कारण inward sheet में कोई भी new GRN nos दिखने पर old GRN nos को strike करके Inward Register में new GRN nos enter करें। Partial GRN के लिए दूसरा GRN no., Quantity & Date भी register में enter किया जाना चाहिए। Discrepancies मिलने पर, Godown Officer को PO & Invoice की hard copy से details verify करनी चाहिए, Grn को corrections के लिए inform करना चाहिए और Duty Manager को inform करने के बाद correct details enter करनी चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true 
+      },
+      { 
+        desc: "5) Duty Manager to check entries in the register with inward sheet and sign for each entry. Duty Manager to provide timely inputs to the godown team to minimise errors in the receiving process.", 
+        hindiDesc: "Duty Manager को inward sheet के साथ register में entries check करनी चाहिए और प्रत्येक entry के लिए sign करना चाहिए। Duty Manager को receiving process में errors को minimize करने के लिए godown team को timely inputs provide करने चाहिए।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "AFPPL INWARD REGISTER",
+    points: [
+      { 
+        desc: "1) AFPPL Inward Register : Both sections of the register must be updated. Inward details for Softy Premix, Popcorn, Kwality Walls & Cones for GRN and MIRO details for expenses section. Part 1: Raw materials, Where we do GRN. Series for inward No to begin with 01/AFPPL/01. GRN number along with Date to be mentioned in the inward register. Overwriting, Whitener or blank stickers should not be done to cover any wrong entries. For corrections a single line cancellation to be done and new details to be written above or below that particular entry. Only Quantity corrections should not be done. AFPPL Expenses: All entries of other material for which GRN is not made, needs to be entered in the 2nd Part (Disposables, Water & Machine Spares & other items). The series to have Prefix 01/FPEX/01. Document number provided by Accounts with date needs to be entered in the register.", 
+        hindiDesc: "AFPPL Inward Register: Register के दोनों sections update किए जाने चाहिए। GRN के लिए Softy Premix, Popcorn, Kwality Walls & Cones के लिए Inward details और expenses section के लिए MIRO details। Part 1: Raw materials, जहाँ हम GRN करते हैं। Inward No की series 01/AFPPL/01 से begin होनी चाहिए। Inward register में Date के साथ GRN number mention किया जाना चाहिए। Overwriting, Whitener या blank stickers का use नहीं होना चाहिए। AFPPL Expenses: अन्य materials जिनकी GRN नहीं बनती, उनकी सभी entries 2nd Part (Disposables, Water & Machine Spares & अन्य items) में enter की जानी चाहिए। Series का Prefix 01/FPEX/01 होना चाहिए। Accounts द्वारा provide document number with date register में enter होना चाहिए।.",
+        marks: 0.2, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "2) Godown Officer to check all entries in the inward register with MB 51 report provided by GRN every day and enter the correct GRN no & Date in the register. If any new GRN nos are observed in the inward sheet due to cancellations, new GRN nos to be entered in Inward Register after striking the old GRN nos. If any discrepancies are noticed, Godown Officer to verify the details with the hard copy of PO & Invoice, inform GRN for necessary corrections and correct details to be entered after informing the Duty Manager.", 
+        hindiDesc: "Godown Officer को हर दिन GRN द्वारा provide MB 51 report के साथ inward register की सभी entries check करनी चाहिए और correct GRN no & Date enter करनी चाहिए। Discrepancies मिलने पर Godown Officer PO & Invoice की hard copy से details verify करे, Grn को inform करे और Duty Manager को inform करने के बाद correct details enter करे।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Duty Manager to check entries in the register with inward sheet and sign for each entry. Duty Manager to provide timely inputs to the godown team to minimise errors in the receiving process.", 
+        hindiDesc: "Duty Manager inward sheet के साथ entries check करके sign करेगा और receiving process में errors minimize करने के लिए inputs देगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "TRANSPORT REGISTER",
+    points: [
+      { 
+        desc: "1) Any articles Received through LR copy or courier to be treated as Transport Receiving. Details on LR, PO, Bill must be checked for the correct address before unloading the transport bundles. Each bundle to be weighed & weight of each bundle to be checked with LR & to be entered in register.", 
+        hindiDesc: "LR copy या courier के थ्रू receive किए गए किसी भी article को Transport Receiving माना जाएगा। Transport bundles unload करने से पहले LR, PO, Bill पर correct address check किया जाना चाहिए। प्रत्येक bundle का weight किया जाना चाहिए और LR के साथ weight check करके register में enter करना चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "2) Bundles to be opened & entries in Inward register to be done on same day. All details to be entered in the register like LR no; Transport name; Vendor Name; No of Bundles; PO No; Invoice No; Weight of bundles; Inward No. & Date, GRN No & Date. etc. GRN details to be entered from MB 51 Inward Sheet next day. In case of wrong delivery by the transport such as wrong address or if PO is closed for a delivery, the same has to be addressed to the category with CH in loop. Store to follow the next steps as suggested by the category.", 
+        hindiDesc: "Bundles open किए जाने चाहिए और उसी दिन Inward register में entries करनी चाहिए। Register में LR no, Transport name, Vendor Name, No of Bundles, PO No, Invoice No, Weight of bundles, Inward No & Date, GRN No & Date जैसी सभी details enter करें। Next day MB 51 Inward Sheet से GRN details enter करें। Transport द्वारा wrong delivery (जैसे गलत address या PO close होना) होने पर CH को loop में रखकर category को address करना चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "3) Duty Manager to check & sign after verifying correctness of all entries in the register.", 
+        hindiDesc: "Duty Manager register में सभी entries की correctness verify करके check & sign करेगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "OTHER INWARD REGISTER",
+    points: [
+      { 
+        desc: "1) Bills for all other articles purchased for store use to be stamped with security stamp when these articles are brought to the store. Bills signed by Duty Manager must be handed over to Godown Staff for entering in the register. Entry to be made immediately in the other inward register and Inward No to be recorded on the bills. Godown Staff to ensure Bill Date, Date on Security stamp and Date on Godown Inward Stamp should be same. Bills to be handed over to Accounts on the same day for payment process. Accounts to sign with date & time in the register. (Sundays & Holidays to be exempted). For Articles received in absence of Godown officers, entries in the register must be made by Duty Manager. Such bills will be handed over to Accounts on next day.", 
+        hindiDesc: "Store use के लिए purchased अन्य सभी articles के bills को store में लाने पर security stamp से stamp किया जाना चाहिए। Duty Manager द्वारा signed bills Godown Staff को register में enter करने के लिए handover किए जाने चाहिए। Other inward register में immediate entry करके bills पर Inward No record किया जाना चाहिए। Godown Staff यह ensure करे कि Bill Date, Security stamp की Date और Godown Inward Stamp की Date same हों। Payment process के लिए उसी दिन bills Accounts को handover किए जाएं। (Sundays & Holidays exempted रहेंगे)।.",
+        marks: 0.2, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) Photocopy of Gate Pass received from other stores for Returnable Articles to be also stamped by Facility and handed over to Godown Staff on the same day. Details will be entered in the register. This will be used by godown Staff while returning the articles within 30 days. While Returning articles back to the parent store, GP no and date to be recorded against the same inward entry in this register. If articles are not returned to the parent store within 30 days, the store responsible for returning will also be penalised.", 
+        hindiDesc: "Returnable Articles के लिए अन्य stores से received Gate Pass की photocopy भी Facility द्वारा stamp करके उसी day Godown Staff को handover की जानी चाहिए। Register में details enter होंगी जो 30 days के अंदर articles return करते समय use होंगी। Parent store को articles return करते समय GP no और date record होगी। 30 days में return न होने पर responsible store penalise होगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "3) Duty Manager to sign in register at day end after checking the articles & confirming all entries are made correctly in the register.", 
+        hindiDesc: "Duty Manager articles check करके और entries correct confirm करने के बाद day end पर register में sign करेगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "DEBIT PROCESS",
+    points: [
+      { 
+        desc: "1) Godown Officer to receive debits from floor along with Goods Return Forms (GRF) duly completed with all details and signed by SA, Floor Officer, Purchase Officer and finally approved by Duty Manager. Manual Debit Notes (in Triplicate) must be made for all articles in each GRF received on the same day. Articles entered in GRF and handed over to Godown should not be cancelled in GRF. Godown officer to enter MDBN no. on GRF & sign. GRF received from Floor after Purchase Officer has left for the day must carry 'Debit After 7 PM' rubber stamp, to be affixed by Godown staff on GRF. MDBN for all such GRF will be made next day morning after getting GRF approved by Purchase Officer. In such cases date on GRF & MDBN will differ by one day.", 
+        hindiDesc: "Godown Officer को floor से Goods Return Forms (GRF) के साथ debits receive करने चाहिए जो SA, Floor Officer, Purchase Officer द्वारा signed और Duty Manager द्वारा approved हों। Received GRF के सभी articles के लिए उसी दिन Manual Debit Notes (in Triplicate) बनाई जानी चाहिए। Godown officer GRF पर MDBN no. enter करके sign करेगा। Purchase Officer के जाने के बाद floor से receive GRF पर Godown staff द्वारा \"Debit After 7 PM\" rubber stamp लगानी चाहिए। ऐसे GRF के MDBN next day morning Purchase Officer से approve कराने के बाद बनेंगे।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) Damaged articles for debit should not lie in godown without any GRF or MDBN or proper documentation. 'Damaged Articles Not For Sale' board must be prominently displayed in the debit area. Proper hygiene must be maintained in the debit area without any oil spill on floor.", 
+        hindiDesc: "Debit के लिए damaged articles बिना GRF, MDBN या proper documentation के godown में नहीं पड़े रहने चाहिए। Debit area में \"Damaged Articles Not For Sale\" board prominently display होना चाहिए। Floor पर oil spill के बिना debit area में proper hygiene maintain होनी चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Godown Staff must pack the debit articles with original MDBN and store in Debit Area (Oil/Ghee/Freezer/Chiller items being an exception). This packing must be opened only when vendor comes to pick up debit either before receiving or exclusively for debit pick up.", 
+        hindiDesc: "Godown Staff को original MDBN के साथ debit articles pack करके Debit Area में store करना चाहिए (Oil/Ghee/Freezer/Chiller items exception हैं)। यह packing तभी open होगी जब vendor receiving से पहले या debit pick up के लिए आए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "4) 'Debit Given and No Debit' rubber stamps to be used appropriately and the same must be affixed by godown on the reverse of our purchase order and duplicate copy of vendor's bills while handing over debits.", 
+        hindiDesc: "\"Debit Given and No Debit\" rubber stamps का properly use किया जाना चाहिए और debits handover करते समय godown द्वारा हमारे purchase order और vendor के bills की duplicate copy के reverse पर इसे affix करना चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "DEBIT NOTE REGISTER",
+    points: [
+      { 
+        desc: "1) Godown officer must enter Srl No, MDBN no, Date, Vendor name & Quantity details immediately in the register. Godown officer must enter all details from MB 51 for Debits (Movement Type 160) provided by GRN. Eg PO No; Date; Debit Value etc. System Print out must be collected from Accounts on the same day of MIRO. If more than one invoice is referred, suffix A, B, C etc appear near PO no. Amount entered will be total of all these PO's. All system printouts received from accounts to be maintained in a folder in alphabetical order.", 
+        hindiDesc: "Godown officer को register में Srl No, MDBN no, Date, Vendor name & Quantity details immediately enter करनी चाहिए। GRN द्वारा provided Debits (Movement Type 160) के लिए MB 51 से सभी details enter करें (जैसे PO No, Date, Debit Value)। Miro के उसी दिन Accounts से System Print out collect किया जाना चाहिए। एक से ज्यादा invoices होने पर PO no के पास suffix A, B, C आदि आएंगे।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) Signature & Contact nos of vendor must be obtained on Gate Pass; DBN Register before handover of Debits. Gate Pass no; Returned Date; Name of vendor & Signature etc must be completed in the DBN register. Debit Articles & System Printouts to be handed over to vendor after completing entries in the register. For all food articles, Godown Staff must affix rubber stamp informing 'Damaged Food articles not fit for human consumption'. This stamp must be affixed on System printout of Debit Note handed over to Vendor.", 
+        hindiDesc: "Debits handover करने से पहले Gate Pass और DBN Register पर vendor के Signature & Contact nos लेने चाहिए। DBN register में Gate Pass no, Returned Date, Name of vendor & Signature complete होने चाहिए। Food articles के लिए Godown Staff rubber stamp लगाएगा: \"Damaged Food articles not fit for human consumption\"। यह stamp Vendor को दिए जाने वाले Debit Note के System printout पर affix होगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Debit articles to be picked up by vendor in 30 days for CORE & NON CORE. Debits should not be accumulated in our stores. For Eg : we should not wait till last week of the month to accumulate all debits and handover to vendors who visit us on a weekly basis.", 
+        hindiDesc: "CORE & NON CORE के लिए vendor द्वारा 30 days में debit articles pick किए जाने चाहिए। हमारे stores में debits accumulate नहीं होने चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "FREE ITEM REGISTER",
+    points: [
+      { 
+        desc: "1) All Free Items must be received at Godown including Samples for Free Distribution to customers. No wrong deliveries to be accepted by Godown like near expiry for food items etc. Refer guidelines as per the FSSAI details. Godown Officer to check quantities of Mother & Child items as per the bill and make no mistakes while receiving.", 
+        hindiDesc: "Customers को Free Distribution के Samples सहित सभी Free Items Godown पर receive होने चाहिए। FSSAI details के guidelines refer करें। Godown Officer bill के अनुसार Mother & Child items की quantities check करे। Godown Receiving officer द्वारा register update और signed होना चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) All Free articles barcodes to be covered by blank sticker while receiving at the godown. All free articles must be handed over to Cash Officer immediately and signature of the receiving cash officer and date to be updated in the register. Any damages in free items to be recorded in the register and only good stocks must be handed over to Cash Officer. All Free items attached with Mother product should be handed over to Floor officer. Such Free item entries will be received & signed by Floor officer.", 
+        hindiDesc: "Godown पर receive होते समय सभी Free articles barcodes blank sticker से cover होने चाहिए। सभी free articles तुरंत Cash Officer को handover किए जाने चाहिए और register में receiving cash officer के signature & date update होने चाहिए। Free items में damages register में record होंगे। Mother product के साथ attached सभी Free items Floor officer को handover किए जाएंगे।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Duty Manager to check & sign register confirming action taken.", 
+        hindiDesc: "Duty Manager action confirm करते हुए register check & sign करेगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "EXCESS ARTICLES REGISTER",
+    points: [
+      { 
+        desc: "1) Articles which are in excess as per PO & Bill must be stored in the Excess Location. All Details entered in this register must be for only all such articles. Articles received in Godown but are unable to do GRN due to Scheme Issues, Landing Issues etc should not be treated as excess & should not be stored in excess location.", 
+        hindiDesc: "PO & Bill के अनुसार excess articles को Excess Location में store किया जाना चाहिए। Scheme Issues, Landing Issues आदि के कारण GRN न हो पाने वाले articles को excess treat नहीं किया जाना चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) Mail approval to be obtained from AM or CH as per the value of excess articles immediately and a copy of approval to be maintained at Godown. Excess articles can be handed over to vendors based on such mail approvals. Excess stocks are handed over to Vendor only after a letter is received from Vendor.", 
+        hindiDesc: "Excess articles की value के according AM या CH से mail approval लिया जाना चाहिए और Godown में copy maintain होनी चाहिए। Mail approvals के base पर excess articles vendors को handover किए जा सकते हैं। Vendor से letter मिलने के बाद ही excess stocks handover होते हैं।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Quantities of articles received in excess must be handed over in full to the vendor. Quantities should not be adjusted against stock shortages in the store. Gate Pass to be made and Gate Pass no must be entered in the register.", 
+        hindiDesc: "Excess received articles की quantities vendor को full handover करनी चाहिए। Store में stock shortages के against quantities adjust नहीं होनी चाहिए। Gate Pass बनेगा और register में enter होगा।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "4) Non core articles received in excess must be informed to the category team by E-Mail and their instructions must be followed.", 
+        hindiDesc: "Excess received non-core articles के बारे में E-mail से category team को inform किया जाना चाहिए और instructions follow होनी चाहिए।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "5) As per Guidelines, Appropriate signatures of SM/AM/CH to be obtained in the register after handing over Excess articles to the vendor.", 
+        hindiDesc: "Guidelines के अनुसार vendor को Excess articles handover करने के बाद register में SM/AM/CH के appropriate signatures लेने चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "GATE PASS BOOK",
+    points: [
+      { 
+        desc: "1) A Gate Pass must be made by Godown officer for all articles going out of the store premises. All such articles must go out from Staff Entry to enable Facility to check.", 
+        hindiDesc: "Store premises से बाहर जाने वाले सभी articles के लिए Godown officer द्वारा Gate Pass बनाया जाना चाहिए। Facility check enable करने के लिए ऐसे सभी articles Staff Entry से बाहर जाने चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) If any Gate Pass is cancelled, serial number must be maintained in the file by Facility and same remarks for cancellation must be entered by Duty Manager on both copies of Gate Pass.", 
+        hindiDesc: "Gate Pass cancel होने पर Facility द्वारा file में serial number maintain होना चाहिए और Duty Manager द्वारा Gate Pass की दोनों copies पर cancellation remarks enter किए जाने चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) All details in the Gate Pass to be filled by Godown officer correctly. Godown Officer will enter the Vehicle no. on the Gate Pass as provided by Facility staff on the reverse of PO which should be same as in vehicle inward register. No wrong Gate Pass to be made by Godown officer. IN TIME entered should be as per clock. Godown officer should not enter Out Time on GatePass.", 
+        hindiDesc: "Godown officer द्वारा Gate Pass की सभी details correctly fill होनी चाहिए। Godown Officer PO के reverse पर Facility staff द्वारा provided Vehicle no. enter करेगा जो vehicle inward register जैसा हो। Godown officer clock के according IN TIME enter करेगा। GatePass पर Out Time enter नहीं करना चाहिए।.",
+        marks: 0.2, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "4) When Gate Pass for returnable articles of other stores are made, reference of old Gate Pass No; Other Inward No & Date must be mentioned on the same. Photocopy of the old Gate Pass with Inward No must be attached to original copy of Gate Pass made by returning store.", 
+        hindiDesc: "अन्य stores के returnable articles के लिए Gate Pass बनने पर old Gate Pass No, Other Inward No & Date का reference mention होना चाहिए। Inward No के साथ old Gate Pass की photocopy attach होगी।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "5) Signature & Contact nos of vendor must be obtained on Gate Pass; Godown officer must handover debit articles, Computer debit note Original copy and Original Gate Pass to vendor or the person carrying the articles along with all other documents. Facility staff must check & collect original copy of Gate Pass from vendor.", 
+        hindiDesc: "Gate Pass पर vendor के Signature & Contact nos लेने चाहिए। Godown officer debit articles, Computer debit note Original copy और Original Gate Pass vendor को handover करेगा। Facility staff vendor से Gate Pass की original copy collect करेगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "6) For all food articles, Godown Staff must affix rubber stamp informing 'Damaged Food articles not fit for human consumption'. This stamp must be affixed on both copies of Gate Pass and Computer printout of Debit Note handed over to Vendor.", 
+        hindiDesc: "Food articles के लिए Godown Staff rubber stamp लगाएगा: \"Damaged Food articles not fit for human consumption\"। यह stamp Gate Pass की दोनों copies और Debit Note के printout पर लगेगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "7) Godown Staff must obtain signature of Duty Manager on Gate Pass before handing over the articles. Manager signing the Gate Pass for Debit articles should check all entries are made correctly as per Computer printout of Debit note.", 
+        hindiDesc: "Articles handover करने से पहले Godown Staff को Duty Manager के signature लेने चाहिए। Debit articles के लिए Gate Pass sign करने वाला manager Debit note के printout के अनुसार entries check करे।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "RETURNABLE GATE PASS BOOK",
+    points: [
+      { 
+        desc: "1) A returnable Gate Pass must be made by Godown Officer for any article which is sent out of the store and is to be returned by other stores within 30 days. Store will be penalised for all delays beyond 30 days without any exception. All Returnable Articles must be received within 30 days with rigorous follow up.", 
+        hindiDesc: "Store से बाहर भेजे जाने वाले और 30 days के भीतर अन्य stores द्वारा return किए जाने वाले article के लिए Returnable Gate Pass बनना चाहिए। 30 days से अधिक delay पर store penalise होगा।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) Any article sent on returnable Gate Pass to Vendors for repairs as per Maintenance Manager, the same should be received in 30 days. For any delays a mail communication from MM to CH must be available for audit verification. Such mails must be sent by MM well in advance and not after crossing 30 days.", 
+        hindiDesc: "Maintenance Manager के अनुसार repairs के लिए Vendors को send articles 30 days में receive होने चाहिए। Delays के लिए MM से CH तक mail communication audit verification के लिए available होना चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) When articles are sent to other stores a photocopy of the Returnable Gate Pass must also be handed over for their records and this will be used to enter in Other Inward Register by the receiving store. This will enable the receiving store to identify the article received and details in returnable gate pass entered by the sender. Any mismatch must be brought to the notice of Duty Manager and resolved immediately.", 
+        hindiDesc: "अन्य stores को articles भेजने पर record के लिए Returnable Gate Pass की photocopy दी जाएगी जिसे receiving store Other Inward Register में enter करेगा। Mismatch होने पर Duty Manager को inform करके resolve किया जाना चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "4) If any Returnable Gate Pass is cancelled, serial number must be maintained in the file by Facility and same remarks for cancellation must be entered by Duty Manager on both copies of Returnable Gate Pass.", 
+        hindiDesc: "Returnable Gate Pass cancel होने पर serial number maintain होगा और Duty Manager cancellation remarks enter करेगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "5) All details in the Returnable Gate Pass to be filled by Godown Officer correctly. Returnable Gate Pass must be signed by Godown Officer. IN Time to be recorded as per clock.", 
+        hindiDesc: "Godown Officer द्वारा Returnable Gate Pass properly fill और signed होना चाहिए। Clock के according IN Time record हो।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "6) Godown Officer must obtain signature of Duty Manager on Returnable Gate Pass before handing over the articles.", 
+        hindiDesc: "Articles handover करने से पहले Godown Officer Duty Manager के signatures ले।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "7) When articles covered under Returnable Gate Pass are received, a rubber stamp with 'Returnable Received, Date of return, Godown Officer Sign, Facility Sign' must be recorded. Duty manager should verify the articles & sign in the Gate Pass confirming the same.", 
+        hindiDesc: "Returnable Gate Pass के under articles receive होने पर rubber stamp: \"Returnable Received, Date of return, Godown Officer Sign, Facility Sign\" लगानी चाहिए। Duty manager verify करके sign करेगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "WEIGHING SCALE CALIBRATION REGISTER",
+    points: [
+      { 
+        desc: "1) Calibration to be done as part of Godown activity in the morning every day before start of receiving. Weight to be recorded in the register. Discrepancies, if any, to be recorded, informed to Duty Manager. Complaints to be logged in System and corrective action must be taken to resolve in 48 hrs. Prior Mail communication from Maintenance manager must be available for verification, for delays due to repairs beyond 48hrs.", 
+        hindiDesc: "Receiving start होने से पहले हर दिन morning में Godown activity के part के रूप में calibration होना चाहिए। Register में weight record होगा। Discrepancies मिलने पर Duty Manager को inform करें। System में complaint log करके 48 hrs में resolve करना चाहिए। 48 hrs से ज्यादा delay के लिए Maintenance manager की prior Mail communication available होनी चाहिए।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: true
+      },
+      { 
+        desc: "2) Duty Manager to check & sign the register.", 
+        hindiDesc: "Duty Manager register check & sign करेगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "DISPOSAL REGISTER",
+    points: [
+      { 
+        desc: "1) For all Write off articles list to be made as per SOP and proper approvals must be obtained. This record must be maintained by Godown Officer. For all Vendor Debits Disposal approval mail from vendor must be available for verification. For Grocery Matra disposal total weight must be recorded.", 
+        hindiDesc: "SOP के अनुसार write off articles की list बनेगी और approvals प्राप्त होंगे। यह record Godown Officer maintain करेगा। Vendor Debits Disposal के लिए vendor approval mail verification के लिए होनी चाहिए। Grocery Matra disposal के लिए total weight record होगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) All write off & Vendor debit articles must be disposed off in presence of Area Manager, Duty Manager, Godown Officer & Facility Staff. Grocery Matra disposal to be done in presence of Duty Manager, Godown Officer & Facility Staff. Names & Signatures of all these personnels for all disposals must be recorded in the disposal register.", 
+        hindiDesc: "Area Manager, Duty Manager, Godown Officer & Facility Staff की presence में write off & Vendor debit articles dispose off होने चाहिए। Grocery Matra disposal Duty Manager, Godown Officer & Facility Staff की presence में हो। Disposals के लिए सभी personnels के names & signatures register में record हों।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Godown Staff must prepare a Gate Pass for all disposal articles. Gate Pass for Vendor debits; Write Off articles; Ullage articles etc. must be signed by AM / CH confirming disposal in their presence. Grocery Matra Gate Pass to be signed by Duty Manager.", 
+        hindiDesc: "Godown Staff disposal articles के लिए Gate Pass prepare करेगा। Vendor debits, Write Off articles, Ullage articles आदि के Gate Pass पर AM / CH के signatures होने चाहिए। Grocery Matra Gate Pass Duty Manager sign करेगा।.",
+        marks: 0.1, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "4) All write off articles for disposal must be destroyed in presence of AM within 7 days post verification by Internal Audit team.", 
+        hindiDesc: "Internal Audit team verification के 7 days post AM की presence में disposal के लिए सभी write off articles destroy होने चाहिए।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      }
+    ]
+  },
+  {
+    name: "AFPPL DISPOSAL REGISTER",
+    points: [
+      { 
+        desc: "1) Godown Officer to receive Left over premix of softy ice cream, Popcorn and damaged cones, popcorn Bags from Cash Officer on daily basis. Premix, Popcorn to be packed and weighed in Bizerba and 2 barcodes for the relevant variants to be printed by Cash Officer & handed over to Godown officer for disposal.", 
+        hindiDesc: "Godown Officer daily basis पर Cash Officer से softy ice cream का left over premix, Popcorn और damaged cones, popcorn Bags receive करेगा। Premix, Popcorn Bizerba में pack और weigh होंगे और Cash Officer disposal के लिए 2 barcodes print करके Godown officer को handover करेगा।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "2) Godown Officer to prepare Gate Pass & record all details in the AFPPL Disposal Register and affix bizerba barcodes in the register. Gate Pass no to be entered in the register.", 
+        hindiDesc: "Godown Officer Gate Pass prepare करेगा और AFPPL Disposal Register में details record करके bizerba barcodes affix करेगा। Register में Gate Pass no enter होगा।.",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "3) Godown Officer to obtain Duty Manager signature on Gate Pass and handover the articles to Facility staff for disposal. Finally articles must be disposed off in presence of Godown Officer, Duty Manager and Facility Staff and all signatures to be made in register.", 
+        hindiDesc: "Godown Officer Gate Pass पर Duty Manager signature लेगा और articles disposal के लिए Facility staff को handover करेगा। Godown Officer, Duty Manager और Facility Staff की presence में articles dispose off होंगे और signatures होंगे।",
+        marks: 0.15, checked: false, comment: "", photos: [], isHighlighted: false 
+      },
+      { 
+        desc: "4) Damaged Cones & Popcorn Bags received from cash Officer to be moved to 0003 location and Document no. with Date to be recorded on daily basis. After Reconcilation by Audit team, Cones & Bags must be disposed off in presence of Auditor & Duty Manager. Gate Pass to be signed by Duty Manager & details to be recorded in the register.", 
+        hindiDesc: "Cash Officer से received Damaged Cones & Popcorn Bags 0003 location पर move होंगे और daily basis पर Document no. with Date record होगा। Audit team द्वारा Reconciliation के बाद Auditor & Duty Manager की presence में Cones & Bags dispose off होंगे। Duty Manager Gate Pass sign करेगा।.",
+        marks: 0.05, checked: false, comment: "", photos: [], isHighlighted: true
+      }
+    ]
+  }
+];
+
+function saveData(){ 
+  try {
+    localStorage.setItem("auditDataGodan2026_v16", JSON.stringify(data));
+  } catch(e) {
+    alert("Storage limit reached! Some photos might be too large.");
+  }
+}
+
+function loadData(){
+  try {
+    let saved = localStorage.getItem("auditDataGodan2026_v16");
+    if(saved){ 
+      data = JSON.parse(saved); 
+      data.forEach(proc => {
+        proc.points.forEach(pt => {
+          if(pt.marks !== undefined) {
+            pt.marks = Number(Number(pt.marks).toFixed(2));
+          }
+          if(!pt.photos) pt.photos = [];
+          if(pt.showHindi === undefined) pt.showHindi = false;
+          if(pt.isHighlighted === undefined) pt.isHighlighted = false;
+        });
+      });
+    } else {
+      data = JSON.parse(JSON.stringify(defaultGodownData));
+      data.forEach(proc => proc.points.forEach(pt => { pt.showHindi = false; }));
+    }
+  } catch(e) {
+    console.warn("Storage reset due to parse error:", e);
+    localStorage.removeItem("auditDataGodan2026_v16");
+    data = JSON.parse(JSON.stringify(defaultGodownData));
+    data.forEach(proc => proc.points.forEach(pt => { pt.showHindi = false; }));
+  }
+  render(); calc(); renderReport(); 
+}
+
+function clearAll(){
+  if(data.length === 0) return;
+  if(confirm("Do you want to clear all checkmarks, remarks, and photos?")){
+    data.forEach(proc => { proc.points.forEach(pt => { pt.checked = false; pt.comment = ""; pt.photos = []; pt.showHindi = false; }); });
+    render(); calc(); renderReport(); saveData();
+  }
+}
+
+document.getElementById("upload").addEventListener("change", function(e){
+  let reader=new FileReader();
+  reader.onload=function(e){
+    let dataArr = new Uint8Array(e.target.result);
+    let wb = XLSX.read(dataArr, {type: 'array', cellStyles: true, cellFormula: true, cellDates: true});
+    let sheetName = wb.SheetNames[0];
+    let sheet = wb.Sheets[sheetName];
+    
+    let range = XLSX.utils.decode_range(sheet['!ref'] || "A1:E100");
+    let rows = [];
+    for(let R = range.s.r; R <= range.e.r; ++R){
+      let rowCells = [];
+      for(let C = range.s.c; C <= range.e.c; ++C){
+        let cellAddress = XLSX.utils.encode_cell({r: R, c: C});
+        let cell = sheet[cellAddress];
+        let val = cell ? cell.v : "";
+        let isRed = false;
+        if(cell && cell.s && cell.s.font && cell.s.font.color) {
+          let fc = cell.s.font.color;
+          let rgb = (fc.rgb || fc.theme || "").toString().toLowerCase();
+          if(rgb.includes("ff0000") || rgb.includes("red") || rgb === "5" || rgb === "2" || (fc.rgb && fc.rgb.toUpperCase() === "FF0000")) {
+            isRed = true;
+          }
+        }
+        rowCells.push({val: val, isRed: isRed});
+      }
+      rows.push(rowCells);
+    }
+    parseAdvanced(rows);
+  };
+  reader.readAsArrayBuffer(e.target.files[0]);
+});
+
+function parseAdvanced(rows){
+  data=[]; openSections={}; let current=null;
+  rows.forEach(r=>{
+    let textCells = r.map(c => c.val ? c.val.toString().trim() : "");
+    let fullText = textCells.join(" ");
+    if(!fullText) return;
+    
+    let isRowRed = r.some(c => c.isRed);
+    
+    if(fullText === fullText.toUpperCase() && fullText.length > 3 && !isRowRed){
+      current = {name: fullText, points: []};
+      data.push(current);
+      return;
+    }
+    
+    let marks = null, desc = "";
+    for(let i = textCells.length - 1; i >= 0; i--){
+      if(!isNaN(textCells[i]) && textCells[i] !== ""){
+        marks = Number(parseFloat(textCells[i]).toFixed(2));
+        desc = textCells.slice(0, i).filter(Boolean).join(" ");
+        break;
+      }
+    }
+    if(desc && marks !== null && current){
+      current.points.push({desc, hindiDesc: desc, marks, checked: false, comment: "", photos: [], showHindi: false, isHighlighted: isRowRed});
+    }
+  });
+  
+  if(data.length === 0) {
+    data = JSON.parse(JSON.stringify(defaultGodownData));
+  }
+  render(); calc(); renderReport(); saveData();
+}
+
+function isSectionAllChecked(p) {
+  let points = data[p].points;
+  if(points.length === 0) return false;
+  return points.every(pt => pt.checked);
+}
+
+function toggleSectionDeduct(p, checked) {
+  data[p].points.forEach(pt => {
+    pt.checked = checked;
+  });
+  render(); calc(); renderReport(); saveData();
+}
+
+function togglePointLanguage(p, i) {
+  data[p].points[i].showHindi = !data[p].points[i].showHindi;
+  render();
+}
+
+function render(){
+  let html="";
+  let search=document.getElementById("search").value.toLowerCase();
+
+  data.forEach((proc,p)=>{
+    let hasVisiblePoints = proc.points.some(pt => {
+      let textToCheck = (pt.desc + " " + (pt.hindiDesc || "")).toLowerCase();
+      if (search && !textToCheck.includes(search) && !proc.name.toLowerCase().includes(search)) return false;
+      if (filter === "deduct" && !pt.checked) return false;
+      if (filter === "highlighted" && !pt.isHighlighted) return false;
+      return true;
+    });
+
+    if(!hasVisiblePoints && (search || filter !== "all")) return;
+
+    let allChecked = isSectionAllChecked(p);
+
+    html+=`<h4 class="proc-header">
+      <div class="proc-header-left" onclick="toggleSection(${p})">
+        <span>${proc.name}</span>
+      </div>
+      <div class="proc-header-right">
+        <label style="font-size:12px; font-weight:600; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Check all points in this section">
+          <input type="checkbox" ${allChecked ? "checked" : ""} onchange="toggleSectionDeduct(${p}, this.checked)" style="transform: scale(1.2); cursor:pointer;">
+          Deduct All
+        </label>
+        <span style="font-size:12px; color:var(--text-muted); cursor:pointer;" onclick="toggleSection(${p})">${openSections[p]?" Hide":" Show"}</span>
+      </div>
+    </h4>`;
+
+    if(!openSections[p] && !search && filter === "all") return;
+
+    proc.points.forEach((pt,i)=>{
+      let textToCheck = (pt.desc + " " + (pt.hindiDesc || "")).toLowerCase();
+      if(search && !textToCheck.includes(search) && !proc.name.toLowerCase().includes(search)) return;
+      if(filter === "deduct" && !pt.checked) return;
+      if(filter === "highlighted" && !pt.isHighlighted) return;
+
+      let formattedMarks = Number(pt.marks).toFixed(2);
+      let photosArr = pt.photos || [];
+      let photosHtml = "";
+      if(photosArr.length > 0){
+        photosHtml = `<div class="preview-container">`;
+        photosArr.forEach((imgSrc, imgIndex) => {
+          photosHtml += `
+            <div class="img-wrapper">
+              <img src="${imgSrc}" class="preview">
+              <div class="btn-del-photo" onclick="deletePhoto(event,${p},${i},${imgIndex})">×</div>
+            </div>`;
+        });
+        photosHtml += `</div>`;
+      }
+
+      let highlightBadgeHtml = pt.isHighlighted ? `<div class="highlight-badge">★ New updated Process Point</div>` : ``;
+
+      let cardClasses = `card`;
+      if(pt.checked) cardClasses += ` deduct`;
+      if(pt.isHighlighted) cardClasses += ` highlighted-point`;
+
+      let hindiSectionHtml = "";
+      if (pt.showHindi && pt.hindiDesc) {
+        hindiSectionHtml = `<div class="hindi-box"><strong>💬 Hinglish:</strong> ${pt.hindiDesc}</div>`;
+      }
+
+      let btnLabel = pt.showHindi ? "Hide Hindi 🔽" : "Show Hindi / Hinglish 🌐";
+
+      html+=`
+      <div class="${cardClasses}">
+        <div class="card-left">
+          ${highlightBadgeHtml}
+          <div class="point-desc">${pt.desc}</div>
+          <div>
+            <button type="button" onclick="togglePointLanguage(${p},${i})" style="font-size:11px; padding:4px 10px; background:#ebf8ff; color:#2b6cb0; border:1px solid #bee3f8; border-radius:4px; font-weight:600; cursor:pointer;">${btnLabel}</button>
+          </div>
+          ${hindiSectionHtml}
+          <textarea placeholder="Write comment here..." oninput="comment(${p},${i},this.value)">${pt.comment || ""}</textarea>
+          <div class="upload-btn-group">
+            <div class="file-inputs-ui">
+              <label class="custom-upload-btn btn-type-gallery" for="gallery-${p}-${i}">📁 Gallery</label>
+              <input type="file" id="gallery-${p}-${i}" accept="image/*" multiple onchange="processIncomingMedia(${p},${i},this)">
+              <label class="custom-upload-btn btn-type-camera" for="camera-${p}-${i}">📷 Camera</label>
+              <input type="file" id="camera-${p}-${i}" accept="image/*" capture="environment" onchange="processIncomingMedia(${p},${i},this)">
+            </div>
+          </div>
+          ${photosHtml}
+        </div>
+        <div class="card-right">
+          <span style="font-size:14px; color:var(--text-main); font-weight:700;">-${formattedMarks} M</span>
+          <input type="checkbox" ${pt.checked?"checked":""} onchange="toggle(${p},${i})" style="transform: scale(1.5); cursor:pointer;">
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById("audit").innerHTML=html;
+}
+
+function toggleSection(i){ openSections[i]=!openSections[i]; render(); }
+function toggle(p,i){ data[p].points[i].checked=!data[p].points[i].checked; render(); calc(); renderReport(); saveData(); }
+function comment(p,i,val){ data[p].points[i].comment=val; renderReport(); saveData(); }
+
+function processIncomingMedia(p, i, input) {
+  if (!input.files || input.files.length === 0) return;
+  tempFileQueue = Array.from(input.files);
+  currentPIndex = p;
+  currentPtIndex = i;
+  input.value = "";
+  launchNextImageFromQueue();
+}
+
+function launchNextImageFromQueue() {
+  if (tempFileQueue.length === 0) return;
+  let nextFile = tempFileQueue.shift();
+  let reader = new FileReader();
+  reader.onload = function(e) { openEditor(e.target.result); };
+  reader.readAsDataURL(nextFile);
+}
+
+function openEditor(imgSrc) {
+  document.getElementById("editorModal").style.display = "flex";
+  drawingPaths = [];
+  
+  baseImage.onload = function() {
+    let displayMaxW = Math.min(window.innerWidth * 0.90, 550);
+    let displayMaxH = window.innerHeight * 0.50;
+    
+    let width = baseImage.width;
+    let height = baseImage.height;
+    
+    if (width > displayMaxW) { height *= (displayMaxW / width); width = displayMaxW; }
+    if (height > displayMaxH) { width *= (displayMaxH / height); height = displayMaxH; }
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    scaleX = baseImage.naturalWidth / canvas.width;
+    scaleY = baseImage.naturalHeight / canvas.height;
+    
+    redrawCanvas();
+  };
+  baseImage.src = imgSrc;
+}
+
+function redrawCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
+  
+  drawingPaths.forEach(path => {
+    ctx.beginPath();
+    ctx.strokeStyle = path.color;
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    path.points.forEach((pt, idx) => {
+      let screenX = pt.x / scaleX;
+      let screenY = pt.y / scaleY;
+      if (idx === 0) ctx.moveTo(screenX, screenY);
+      else ctx.lineTo(screenX, screenY);
+    });
+    ctx.stroke();
+  });
+}
+
+function setPenColor(color, element) {
+  penColor = color;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  element.classList.add('active');
+}
+
+function resetCanvasDrawing() {
+  drawingPaths = [];
+  redrawCanvas();
+}
+
+function getCanvasCoords(e) {
+  let rect = canvas.getBoundingClientRect();
+  let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function startDrawing(e) {
+  let coords = getCanvasCoords(e);
+  isDrawing = true;
+  let currentPath = { color: penColor, points: [{ x: coords.x * scaleX, y: coords.y * scaleY }] };
+  drawingPaths.push(currentPath);
+  e.preventDefault();
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  let coords = getCanvasCoords(e);
+  let path = drawingPaths[drawingPaths.length - 1];
+  path.points.push({ x: coords.x * scaleX, y: coords.y * scaleY });
+  redrawCanvas();
+  e.preventDefault();
+}
+
+function stopDrawing() { isDrawing = false; }
+
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchend', stopDrawing);
+
+function closeEditor() { document.getElementById("editorModal").style.display = "none"; launchNextImageFromQueue(); }
+
+function saveEditedPhoto() {
+  let hdFinalCanvas = document.createElement('canvas');
+  let hdFinalCtx = hdFinalCanvas.getContext('2d');
+  
+  hdFinalCanvas.width = baseImage.naturalWidth;
+  hdFinalCanvas.height = baseImage.naturalHeight;
+  
+  hdFinalCtx.drawImage(baseImage, 0, 0);
+  
+  drawingPaths.forEach(path => {
+    hdFinalCtx.beginPath();
+    hdFinalCtx.strokeStyle = path.color;
+    hdFinalCtx.lineWidth = (baseImage.naturalWidth / 500) * 5; 
+    hdFinalCtx.lineCap = 'round';
+    hdFinalCtx.lineJoin = 'round';
+    
+    path.points.forEach((pt, idx) => {
+      if (idx === 0) hdFinalCtx.moveTo(pt.x, pt.y);
+      else hdFinalCtx.lineTo(pt.x, pt.y);
+    });
+    hdFinalCtx.stroke();
+  });
+  
+  if (!data[currentPIndex].points[currentPtIndex].photos) {
+    data[currentPIndex].points[currentPtIndex].photos = [];
+  }
+  
+  let fullResolutionDataUrl = hdFinalCanvas.toDataURL('image/jpeg', 0.85);
+  data[currentPIndex].points[currentPtIndex].photos.push(fullResolutionDataUrl);
+  
+  document.getElementById("editorModal").style.display = "none";
+  render(); renderReport(); saveData();
+  launchNextImageFromQueue();
+}
+
+function deletePhoto(e, p, i, imgIndex){
+  if(e) e.stopPropagation();
+  data[p].points[i].photos.splice(imgIndex, 1);
+  render(); calc(); renderReport(); saveData();
+}
+
+function calc(){
+  let d = 0;
+  data.forEach(proc => {
+    proc.points.forEach(pt => {
+      if(pt.checked) d += Number(pt.marks);
+    });
+  });
+  let totalDeduction = Number(d.toFixed(2));
+  let finalScore = Number((TOTAL_MAX - totalDeduction).toFixed(2));
+  
+  document.getElementById("result").innerHTML =
+  `<span class="marks-highlight">Total Deduction: ${totalDeduction.toFixed(2)}</span> &nbsp;|&nbsp; 
+   <span class="score-highlight">Final Score: ${finalScore.toFixed(2)} / ${TOTAL_MAX.toFixed(2)}</span>`;
+}
+
+function renderReport(){
+  let html=""; let sectionTotals={}, total=0;
+  data.forEach(proc=>{
+    proc.points.forEach(pt=>{
+      if(pt.checked){
+        total += Number(pt.marks);
+        if(!sectionTotals[proc.name]) sectionTotals[proc.name]=0;
+        sectionTotals[proc.name] += Number(pt.marks);
+      }
+    });
+  });
+  for(let sec in sectionTotals){
+    html+=`<div class="comment-box">${sec} : -${Number(sectionTotals[sec]).toFixed(2)} Marks</div>`;
+  }
+  let totalDeductFormatted = Number(total).toFixed(2);
+  let finalScoreFormatted = Number(TOTAL_MAX - total).toFixed(2);
+  html+=`<div class="total-box">Total Deduction: ${totalDeductFormatted} / ${TOTAL_MAX.toFixed(2)}<br>
+    <span style="color:var(--accent-green)">Final Score: ${finalScoreFormatted}</span></div>`;
+  document.getElementById("deductionReport").innerHTML=html;
+}
+
+function shareReport(){
+  const now = new Date();
+  let txt = `*GODOWN PROCESS DAILY CHECK*\n*Date: ${now.toLocaleDateString('en-GB')}  Time: ${now.toLocaleTimeString()}*\n\n`;
+  
+  let total = 0; 
+  let sectionTotals = {}; 
+  let count = 1;
+  
+  data.forEach(proc => {
+    proc.points.forEach(pt => { 
+      if(pt.checked){ 
+        total += Number(pt.marks); 
+        if(!sectionTotals[proc.name]) sectionTotals[proc.name] = 0; 
+        sectionTotals[proc.name] += Number(pt.marks); 
+      } 
+    });
+  });
+
+  for(let sec in sectionTotals){ 
+    txt += `*${count}:${sec} ${Number(sectionTotals[sec]).toFixed(2)} : -${Number(sectionTotals[sec]).toFixed(2)}*\n`; 
+    count++; 
+  }
+  
+  let totalDeductFormatted = Number(total).toFixed(2);
+  let achievedMarksFormatted = Number(TOTAL_MAX - total).toFixed(2);
+  
+  txt += `\n______________________________________\n`;
+  txt += `*All Points Total Deduction: ${totalDeductFormatted} / ${TOTAL_MAX.toFixed(2)}*\n`;
+  txt += `                   *Achieve marks: ${achievedMarksFormatted}*\n\n`;
+  txt += `*DETAIL REPORT MARKS DEDUCT*\n\n`;
+  
+  data.forEach(proc => {
+    proc.points.forEach((pt, i) => {
+      if(pt.checked){
+        let cleanDesc = pt.desc.replace(/<[^>]*>/g, '');
+        txt += `*Point: ${proc.name} ${Number(pt.marks).toFixed(2)}*\n`;
+        txt += `${i + 1}) ${cleanDesc}\n`;
+        txt += `*Deduction Marks : -${Number(pt.marks).toFixed(2)} MARKS*\n`;
+        if(pt.comment){
+          txt += `*Deduct Point : ${pt.comment}*\n`;
+        } else {
+          txt += `*Deduct Point : *\n`;
+        }
+        txt += `\n`;
+      }
+    });
+  });
+
+  window.location.href = "https://wa.me/?text=" + encodeURIComponent(txt);
+}
+
+async function exportToExcel(){
+  if(data.length === 0) return;
+  let reportRows = [
+    ["Godown Process Audit Report 2026"],
+    ["Developed by:", "Sk"],
+    [],
+    ["Process Section", "Point Description", "Deduction Marks", "Status", "Auditor Comment", "Is Highlighted"]
+  ];
+  data.forEach(proc => {
+    proc.points.forEach((pt, idx) => {
+      reportRows.push([proc.name, pt.desc.replace(/<[^>]*>/g, ''), Number(pt.marks).toFixed(2), pt.checked ? "DEDUCT" : "OK", pt.comment || "", pt.isHighlighted ? "YES" : "NO"]);
+    });
+  });
+  let totalDeduct = 0;
+  data.forEach(p => p.points.forEach(pt => { if(pt.checked) totalDeduct += Number(pt.marks); }));
+  reportRows.push([]);
+  reportRows.push(["", "", "Total Deduction:", Number(totalDeduct).toFixed(2)]);
+  reportRows.push(["", "", "Final Score:", Number(TOTAL_MAX - totalDeduct).toFixed(2)]);
+
+  let ws = XLSX.utils.aoa_to_sheet(reportRows);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Audit Live Report");
+
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  let now = new Date();
+  let dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-');
+  let timeStr = now.toLocaleTimeString().replace(/:/g, '-');
+  let fileName = `GODOWN_PROCESS_DAILY_CHECK_${dateStr}_${timeStr}.xlsx`;
+  const file = new File([blob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { 
+      await navigator.share({ files: [file], title: 'Audit Report', text: 'Godown Audit Excel Report' }); 
+      return;
+    } catch (err) { console.log("Share dismissed"); }
+  } 
+  
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function sharePDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 15;
+  const now = new Date();
+  const pageHeight = doc.internal.pageSize.height;
+  const pageWidth = doc.internal.pageSize.width;
+
+  doc.setFillColor(49, 130, 206);
+  doc.rect(14, y, pageWidth - 28, 16, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("GODOWN PROCESS 2026 DAILY CHECK", pageWidth / 2, y + 10, { align: "center" });
+  y += 20;
+
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(45, 55, 72);
+  doc.text("sk", 14, y);
+  y += 6;
+
+  const dateStr = now.toLocaleDateString('en-GB');
+  const timeStr = now.toLocaleTimeString();
+  doc.text(`Audit Date & Time: ${dateStr} | ${timeStr}`, 14, y);
+  y += 8;
+
+  let total = 0;
+  let sectionTotals = {};
+  data.forEach(proc => {
+    proc.points.forEach(pt => {
+      if (pt.checked) {
+        total += Number(pt.marks);
+        if (!sectionTotals[proc.name]) sectionTotals[proc.name] = 0;
+        sectionTotals[proc.name] += Number(pt.marks);
+      }
+    });
+  });
+
+  let numSections = Object.keys(sectionTotals).length;
+  let summaryBoxHeight = 36 + (numSections * 7);
+  
+  doc.setDrawColor(209, 213, 219);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(14, y, pageWidth - 28, summaryBoxHeight, 3, 3, 'FD');
+
+  let boxY = y + 7;
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("Summary of Deductions:", 18, boxY);
+  boxY += 6;
+
+  doc.setFont("Helvetica", "normal");
+  let count = 1;
+  for (let sec in sectionTotals) {
+    doc.text(`${count}. ${sec}`, 18, boxY);
+    doc.text(`-${Number(sectionTotals[sec]).toFixed(2)} M`, pageWidth - 25, boxY, { align: "right" });
+    boxY += 6;
+    count++;
+  }
+
+  boxY += 2;
+  doc.setDrawColor(209, 213, 219);
+  doc.line(18, boxY, pageWidth - 18, boxY);
+  boxY += 6;
+
+  doc.setFont("Helvetica", "bold");
+  doc.setTextColor(229, 62, 62);
+  doc.text(`Total Deduction: ${Number(total).toFixed(2)} / ${TOTAL_MAX.toFixed(2)}`, 18, boxY);
+  doc.setTextColor(56, 161, 105);
+  doc.text(`Final Score: ${Number(TOTAL_MAX - total).toFixed(2)}`, pageWidth - 25, boxY, { align: "right" });
+  
+  y += summaryBoxHeight + 10;
+
+  if (y > pageHeight - 25) { doc.addPage(); y = 20; }
+  doc.setTextColor(45, 55, 72);
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("DETAILED NON-COMPLIANCE REPORT", 14, y);
+  y += 6;
+
+  data.forEach(proc => {
+    proc.points.forEach((pt, i) => {
+      if (pt.checked) {
+        if (y > pageHeight - 35) { doc.addPage(); y = 20; }
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(49, 130, 206);
+        doc.text(`${proc.name} (-${Number(pt.marks).toFixed(2)} M)`, 14, y);
+        y += 5;
+
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(45, 55, 72);
+        let cleanDesc = pt.desc.replace(/<[^>]*>/g, '');
+        let splitDesc = doc.splitTextToSize(`${i + 1}) ${cleanDesc}`, pageWidth - 28);
+        doc.text(splitDesc, 14, y);
+        y += (splitDesc.length * 4.5) + 2;
+
+        let commentText = pt.comment ? `Deduct Point / Comment: ${pt.comment}` : `Deduct Point: `;
+        let splitComment = doc.splitTextToSize(commentText, pageWidth - 28);
+        doc.setTextColor(229, 62, 62);
+        doc.text(splitComment, 14, y);
+        y += (splitComment.length * 4.5) + 4;
+
+        if (pt.photos && pt.photos.length > 0) {
+          pt.photos.forEach((imgSrc) => {
+            if (y > pageHeight - 50) { doc.addPage(); y = 20; }
+            try {
+              doc.addImage(imgSrc, 'JPEG', 14, y, 35, 35);
+              y += 40;
+            } catch(err) { console.log(err); }
+          });
+        }
+        y += 3;
+      }
+    });
+  });
+
+  const pdfOutput = doc.output('blob');
+  let dateStrName = now.toLocaleDateString('en-GB').replace(/\//g, '-');
+  let timeStrName = now.toLocaleTimeString().replace(/:/g, '-');
+  let pdfFileName = `GODOWN_PROCESS_REPORT_${dateStrName}_${timeStrName}.pdf`;
+  const pdfFile = new File([pdfOutput], pdfFileName, { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+    try {
+      await navigator.share({ files: [pdfFile], title: 'Godown Audit PDF Report', text: 'Godown Process Audit Report PDF' });
+      return;
+    } catch(err) { console.log("PDF share dismissed"); }
+  }
+
+  let url = URL.openObjectURL ? URL.openObjectURL(pdfOutput) : URL.createObjectURL(pdfOutput);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = pdfFileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+window.onload = loadData;
+</script>
+
+</body>
+</html>
