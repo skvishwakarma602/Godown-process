@@ -1,0 +1,15 @@
+{
+  "name": "Audit App Godown Process 2026",
+  "short_name": "Godown Audit",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#eef2f5",
+  "theme_color": "#3182ce",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2805/2805368.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
